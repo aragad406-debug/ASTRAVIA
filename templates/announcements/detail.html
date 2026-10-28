@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ item|loc:"title" }} — {% ui "site.name" %}{% endblock %}
+{% block description %}{{ item|loc:"summary"|truncatechars:160 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ item|loc:"title" }}{% endblock %}
+{% block og_image %}{% if item.cover and item.cover.url %}<meta property="og:image" content="{% absolute_url item.cover.url %}">{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block content %}
+<article class="wrap wrap--narrow">
+  <header class="page-head">
+    <p class="muted"><a href="{% url 'announcements:list' %}">{% ui "news.back" %}</a> · <time datetime="{{ item.display_date|date:'c' }}">{{ item.display_date|date:"j F Y" }}</time> · {{ item.get_category_display }}</p>
+    <h1>{{ item|loc:"title" }}</h1>
+    <p>{{ item|loc:"summary" }}</p>
+  </header>
+  {% if item.cover and item.cover.url %}<div class="media-frame" style="margin-block-end: var(--space-6)"><img src="{{ item.cover.url }}" alt="{{ item.cover|loc:'alt_text' }}"></div>{% endif %}
+  <div class="prose" lang="{{ item|loc_lang:'body' }}">{{ item|loc:"body"|linebreaks }}</div>
+</article>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% load static astravia %}<!doctype html>
+<html lang="{{ LANG }}" dir="{{ DIR }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}{% ui "studio.name" %}{% endblock %}</title>
+  <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/astravia.css' %}">
+  <link rel="stylesheet" href="{% static 'css/studio.css' %}">
+</head>
+<body class="studio">
+<a class="skip-link" href="#studio-main">{% ui "nav.skip" %}</a>
+<div class="studio-shell">
+  <aside class="studio-side" data-studio-side id="studio-side">
+    <a class="wordmark" href="{% url 'creator_studio:dashboard' %}"><span class="wordmark__mark" aria-hidden="true"></span>ASTRAVIA</a>
+    <p class="studio-side__sub">{% ui "studio.name" %}</p>
+    <nav class="studio-nav" aria-label="Studio">
+      <ul><li><a href="{% url 'creator_studio:dashboard' %}" {% if request.resolver_match.url_name == "dashboard" %}aria-current="page"{% endif %}>{% ui "studio.dashboard" %}</a></li></ul>
+      {% for group in studio_nav %}{% if group.items %}
+      <h2>{% if LANG == "ar" %}{{ group.label_ar }}{% else %}{{ group.label_en }}{% endif %}</h2>
+      <ul>
+        {% for s in group.items %}<li><a href="{% url 'creator_studio:content_list' s.key %}" {% if section.key == s.key %}aria-current="page"{% endif %}>{% if LANG == "ar" %}{{ s.label_ar }}{% else %}{{ s.label }}{% endif %}</a></li>{% endfor %}
+        {% if group.key == "localization" %}
+          <li><a href="{% url 'creator_studio:localization' %}" {% if request.resolver_match.url_name == "localization" %}aria-current="page"{% endif %}>Translation status</a></li>
+          <li><a href="{% url 'creator_studio:localization_missing' %}">Missing translations</a></li>
+          {% if perms.core.view_uistring %}<li><a href="{% url 'creator_studio:interface_text' %}">Interface text</a></li>{% endif %}
+        {% endif %}
+      </ul>
+      {% endif %}{% endfor %}
+      <h2>{% if LANG == "ar" %}الإدارة{% else %}Administration{% endif %}</h2>
+      <ul>
+        <li><a href="{% url 'creator_studio:publications' %}">Publication history</a></li>
+        {% if perms.core.view_audit_log %}<li><a href="{% url 'creator_studio:audit_log' %}">Audit log</a></li>{% endif %}
+        {% if perms.core.manage_team %}<li><a href="{% url 'creator_studio:team' %}">Team &amp; roles</a></li><li><a href="{% url 'creator_studio:deletion_requests' %}">Deletion requests</a></li>{% endif %}
+        {% if perms.core.manage_site_settings %}<li><a href="{% url 'creator_studio:site_settings' %}">Site settings</a></li>{% endif %}
+      </ul>
+    </nav>
+  </aside>
+  <div class="studio-main">
+    <div class="studio-top">
+      <button class="btn btn--ghost btn--small nav-toggle-studio" type="button" data-studio-nav-toggle aria-controls="studio-side" aria-expanded="false">{% ui "nav.menu" %}</button>
+      <span class="studio-top__spacer"></span>
+      <a href="{% url 'core:home' %}">{% ui "studio.view_site" %}</a>
+      <a href="?{% query_transform lang=OTHER_LANG %}" lang="{{ OTHER_LANG }}">{% ui "lang.switch_to" %}</a>
+      <span class="muted" style="font-size:.85rem">{{ user.email }}</span>
+      <form method="post" action="{% url 'creator_studio:logout' %}">{% csrf_token %}<button class="linklike" type="submit">{% ui "nav.sign_out" %}</button></form>
+    </div>
+    <main class="studio-content" id="studio-main" tabindex="-1">
+      {% if messages %}<ul class="messages" role="status">{% for m in messages %}<li class="message message--{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script src="{% static 'js/studio.js' %}" defer></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Storyboard — {{ cinematic }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_list' 'cinematics' %}">Cinematics</a> / <a href="{% url 'creator_studio:content_edit' 'cinematics' cinematic.pk %}">{{ cinematic }}</a> /</p>
+<div class="studio-head"><div><h1>Storyboard: {{ cinematic.title_en }}</h1>
+  <p>{{ cinematic.get_render_status_display }}{% if cinematic.unreal_sequence_path %} · {{ cinematic.unreal_sequence_path }}{% endif %} · {{ scenes|length }} scene{{ scenes|length|pluralize }} · {{ total }} s planned</p></div></div>
+{% if cinematic.render_status != "rendered" %}<p class="panel panel--warn">This is planning metadata. No rendered video exists for this cinematic yet.</p>
+{% elif cinematic.rendered_video %}<video controls preload="none" src="{{ cinematic.rendered_video.url }}" style="inline-size:100%;margin-block-end:1rem"></video>{% endif %}
+{% if scenes %}
+<div class="storyboard">
+  {% for s in scenes %}
+  <article class="frame">
+    <div class="frame__shot">{{ s.shot_description_en|default:"No shot description" }}</div>
+    <div class="frame__body">
+      <h3>{{ s.order }}. {{ s.title_en|default:"Untitled scene" }}</h3>
+      {% if s.camera_notes %}<p class="frame__meta">Camera: {{ s.camera_notes }}</p>{% endif %}
+      {% if s.dialogue %}<p>“{{ s.dialogue.text_en }}”<br><span lang="ar" dir="rtl">«{{ s.dialogue.text_ar }}»</span></p>{% endif %}
+      {% if s.voice_track %}<audio controls preload="none" src="{{ s.voice_track.url }}" style="inline-size:100%"></audio>{% endif %}
+      <p class="frame__meta">{% if s.duration_seconds %}{{ s.duration_seconds }} s{% endif %}{% if s.music_reference %} · Music: {{ s.music_reference }}{% endif %}{% if s.sound_effects %} · SFX: {{ s.sound_effects }}{% endif %}</p>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}<p class="empty-state">No scenes yet. Add them on the cinematic page.</p>{% endif %}
+{% endblock %}

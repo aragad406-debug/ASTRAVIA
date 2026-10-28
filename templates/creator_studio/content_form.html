@@ -1,0 +1,149 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}{% if obj %}{{ obj }}{% else %}New {{ section.label|lower }}{% endif %} — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_list' section.key %}">{{ section.label }}</a> /</p>
+<div class="studio-head">
+  <div>
+    <h1>{% if obj %}{{ obj }}{% else %}New {{ section.label|lower }}{% endif %}</h1>
+    {% if obj and section.publishable %}<div class="state-line">{% status_badge obj %}{% if obj.status == "scheduled" %}<span class="muted">goes live {{ obj.publish_at|date:"Y-m-d H:i" }} UTC</span>{% endif %}<span class="muted">revision {{ obj.revision }}</span>{% if obj.is_seeded %}<span class="badge">canonical seed</span>{% endif %}</div>{% endif %}
+  </div>
+  {% if obj %}<div class="cluster">
+    {% if preview_url %}<a class="btn btn--ghost btn--small" href="{{ preview_url }}" target="_blank" rel="noopener">{% ui "studio.preview" %}</a>{% endif %}
+    <a class="btn btn--ghost btn--small" href="{% url 'creator_studio:revision_list' section.key obj.pk %}">{% ui "studio.revisions" %}</a>
+    {% if section.key == "chapters" %}<a class="btn btn--ghost btn--small" href="{% url 'creator_studio:story_flow' obj.pk %}">Flow editor</a>{% endif %}
+    {% if section.key == "dialogue" %}<a class="btn btn--ghost btn--small" href="{% url 'creator_studio:dialogue_preview' obj.pk %}">Preview dialogue</a>{% endif %}
+    {% if section.key == "cinematics" %}<a class="btn btn--ghost btn--small" href="{% url 'creator_studio:storyboard' obj.pk %}">Storyboard</a>{% endif %}
+    {% if obj.localized_fields %}<a class="btn btn--ghost btn--small" href="{% url 'creator_studio:localization_compare' section.key obj.pk %}">Compare translations</a>{% endif %}
+  </div>{% endif %}
+</div>
+
+{% if obj and not can_edit %}<div class="panel panel--warn" role="note">{% if obj.is_live %}This record is live on the website. Editing it changes the public site immediately, so it requires publishing permission. Ask a reviewer, or unpublish it first.{% else %}You can view this record but not change it.{% endif %}</div>{% endif %}
+
+<div class="edit-layout">
+  <form method="post" enctype="multipart/form-data" novalidate id="content-form">
+    {% csrf_token %}
+    {% if form.errors or formsets_have_errors %}<div class="form-errors" role="alert" tabindex="-1" data-error-summary><p>Fix the highlighted fields and save again.</p>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+    <div class="panel"><div class="form-grid">
+      {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+      {% for field in form.visible_fields %}{% include "creator_studio/_field.html" %}{% endfor %}
+    </div></div>
+
+    {% for fs in formsets %}
+    <section class="inline-set" data-formset="{{ fs.prefix }}">
+      <h2>{{ fs.studio_label }}</h2>
+      {{ fs.management_form }}
+      {% for e in fs.non_form_errors %}<p class="errorlist">{{ e }}</p>{% endfor %}
+      <div data-rows>
+        {% for sub in fs.forms %}
+        <div class="inline-row">
+          <div class="inline-row__head"><span>{% if sub.instance.pk %}{{ sub.instance }}{% else %}New{% endif %}</span>{% if sub.DELETE %}<label>{{ sub.DELETE }} Remove</label>{% endif %}</div>
+          {% for e in sub.non_field_errors %}<p class="errorlist">{{ e }}</p>{% endfor %}
+          {% for h in sub.hidden_fields %}{{ h }}{% endfor %}
+          <div class="form-grid">{% for field in sub.visible_fields %}{% if field.name != "DELETE" %}{% include "creator_studio/_field.html" %}{% endif %}{% endfor %}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <template data-empty-form><div class="inline-row"><div class="inline-row__head"><span>New</span></div>{% for h in fs.empty_form.hidden_fields %}{{ h }}{% endfor %}<div class="form-grid">{% for field in fs.empty_form.visible_fields %}{% if field.name != "DELETE" %}{% include "creator_studio/_field.html" %}{% endif %}{% endfor %}</div></div></template>
+      {% if can_edit or not obj %}<button class="btn btn--ghost btn--small" type="button" data-add-row hidden>Add another</button>{% endif %}
+    </section>
+    {% endfor %}
+
+    {% if can_edit or not obj %}
+    <div class="form-actions">
+      <button class="btn" type="submit">{% ui "studio.save" %}</button>
+      <a class="btn btn--ghost" href="{% url 'creator_studio:content_list' section.key %}">{% ui "studio.cancel" %}</a>
+    </div>
+    {% endif %}
+  </form>
+
+  {% if obj %}
+  <aside>
+    {% if section.publishable %}
+    <section class="panel">
+      <h2>Publication</h2>
+      <div class="workflow">
+        {% for action in actions %}
+          {% if action == "schedule" %}
+          <form method="post" action="{% url 'creator_studio:content_transition' section.key obj.pk 'schedule' %}" class="stack">{% csrf_token %}
+            <label for="id_publish_at" class="helptext-inline">Publish at (UTC)</label>{{ schedule_form.publish_at }}
+            <button class="btn btn--ghost" type="submit">{% ui "studio.schedule" %}</button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'creator_studio:content_transition' section.key obj.pk action %}" {% if action == "archive" or action == "unpublish" %}data-confirm="{{ action|capfirst }} “{{ obj }}”?"{% endif %}>{% csrf_token %}
+            <button class="btn {% if action == 'publish' %}btn--gold{% elif action == 'archive' %}btn--danger{% else %}btn--ghost{% endif %}" type="submit">
+              {% if action == "publish" %}{% ui "studio.publish" %}{% elif action == "unpublish" %}{% ui "studio.unpublish" %}{% elif action == "submit" %}{% ui "studio.submit_review" %}{% elif action == "approve" %}{% ui "studio.approve" %}{% elif action == "return_draft" %}{% ui "studio.return_draft" %}{% elif action == "archive" %}{% ui "studio.archive" %}{% endif %}
+            </button>
+          </form>
+          {% endif %}
+        {% empty %}<p class="muted">No publication actions are available to you for this record.</p>{% endfor %}
+      </div>
+      {% if history %}<h3 style="margin-block-start:1rem">History</h3><ul class="compact-list">{% for h in history %}<li><span>{{ h.get_action_display }}</span><small>{{ h.actor.email|default:"system" }} · {{ h.created_at|date:"Y-m-d H:i" }}</small></li>{% endfor %}</ul>{% endif %}
+    </section>
+    {% endif %}
+
+    {% if graph_report %}
+    <section class="panel {% if graph_report.errors %}panel--error{% elif graph_report.warnings %}panel--warn{% else %}panel--ok{% endif %}">
+      <h2>Story graph</h2>
+      {% if graph_report.errors %}<ul class="report-list report-list--error">{% for e in graph_report.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      {% if graph_report.warnings %}<ul class="report-list report-list--warn">{% for w in graph_report.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+      {% if not graph_report.errors and not graph_report.warnings %}<p class="muted">No problems found.</p>{% endif %}
+      <a href="{% url 'creator_studio:story_flow' obj.pk %}">Open the flow editor</a>
+    </section>
+    {% endif %}
+
+    {% if quest_report %}
+    <section class="panel {% if quest_report.cycle %}panel--error{% else %}panel--ok{% endif %}">
+      <h2>Quest chain</h2>
+      {% if quest_report.cycle %}<p class="errorlist">Circular prerequisites: {{ quest_report.cycle|join:" → " }}</p>{% else %}<p class="muted">No circular prerequisites.</p>{% endif %}
+    </section>
+    {% endif %}
+
+    {% if section.key == "dialogue" %}
+    <section class="panel">
+      <h2>Voice</h2>
+      {% if obj.voice_en %}<p class="helptext-inline">English</p><audio controls preload="none" src="{{ obj.voice_en.url }}" style="inline-size:100%"></audio>{% endif %}
+      {% if obj.voice_ar %}<p class="helptext-inline">Arabic</p><audio controls preload="none" src="{{ obj.voice_ar.url }}" style="inline-size:100%"></audio>{% endif %}
+      {% if not obj.voice_en and not obj.voice_ar %}<p class="muted">No audio attached. Upload recorded audio in the media library and select it above.</p>{% endif %}
+      {% if voice_profiles and perms.dialogues.add_voicegenerationrequest %}
+      <form method="post" action="{% url 'creator_studio:voice_generate' obj.pk %}" class="stack">{% csrf_token %}
+        <label class="helptext-inline" for="vp">Generate with a voice profile</label>
+        <select id="vp" name="voice_profile">{% for vp in voice_profiles %}<option value="{{ vp.pk }}">{{ vp }} · {{ vp.get_provider_display }}</option>{% endfor %}</select>
+        <select name="language" aria-label="Language"><option value="en">English</option><option value="ar">Arabic</option></select>
+        <button class="btn btn--ghost btn--small" type="submit">Request generation</button>
+      </form>
+      {% endif %}
+      {% if voice_requests %}<ul class="compact-list">{% for r in voice_requests %}<li><span>{{ r.language }} · {{ r.get_status_display }}</span><small>{{ r.created_at|date:"Y-m-d H:i" }}</small></li>{% endfor %}</ul>{% endif %}
+    </section>
+    {% endif %}
+
+    {% if section.key == "media" %}
+    <section class="panel {% if media_missing %}panel--error{% endif %}">
+      <h2>File</h2>
+      {% if obj.kind == "image" and obj.url %}<img src="{{ obj.url }}" alt="{{ obj.alt_text_en }}" style="border-radius:4px">{% endif %}
+      {% if obj.kind == "audio" and obj.url %}<audio controls preload="none" src="{{ obj.url }}" style="inline-size:100%"></audio>{% endif %}
+      {% if obj.kind == "video" and obj.url %}<video controls preload="none" src="{{ obj.url }}" style="inline-size:100%"></video>{% endif %}
+      <ul class="compact-list">
+        <li><span>Format</span><small>{{ obj.detected_format|upper|default:"—" }} {{ obj.mime_type }}</small></li>
+        <li><span>Size</span><small>{{ obj.size_bytes|filesizeformat }}</small></li>
+        {% if obj.width %}<li><span>Dimensions</span><small>{{ obj.width }} × {{ obj.height }}</small></li>{% endif %}
+        <li><span>Source</span><small>{% if obj.is_generated %}Generated{% else %}Uploaded{% endif %}</small></li>
+      </ul>
+      {% if media_missing %}<p class="errorlist">The file is missing from storage. Upload a replacement.</p>{% endif %}
+    </section>
+    {% endif %}
+
+    {% if missing %}
+    <section class="panel panel--warn"><h2>Missing translations</h2><ul class="report-list">{% for field, lang in missing %}<li>{{ field }} — {{ lang|upper }}</li>{% endfor %}</ul></section>
+    {% endif %}
+
+    {% if can_delete %}
+    <section class="panel">
+      <h2>Delete</h2>
+      <p class="helptext-inline">{% if section.publishable %}Only drafts and archived records with no linked content can be deleted. Archive published content instead.{% else %}Deletion is permanent.{% endif %}</p>
+      <form method="post" action="{% url 'creator_studio:content_delete' section.key obj.pk %}" data-confirm="Permanently delete “{{ obj }}”? This cannot be undone.">{% csrf_token %}<button class="btn btn--danger btn--small" type="submit">{% ui "studio.delete" %}</button></form>
+    </section>
+    {% endif %}
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}

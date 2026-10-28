@@ -1,0 +1,70 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}{% ui "studio.dashboard" %} — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head">
+  <div><h1>{% ui "studio.dashboard" %}</h1><p>Every number here is counted from the database.</p></div>
+</div>
+
+<div class="quick-actions">
+  {% if perms.worlds.add_world %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'worlds' %}">New world</a>{% endif %}
+  {% if perms.characters.add_character %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'characters' %}">New character</a>{% endif %}
+  {% if perms.narrative.add_storyarc %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'arcs' %}">New story</a>{% endif %}
+  {% if perms.quests.add_quest %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'quests' %}">New quest</a>{% endif %}
+  {% if perms.dialogues.add_dialogueentry %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'dialogue' %}">New dialogue</a>{% endif %}
+  {% if perms.media_library.add_mediaasset %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'media' %}">Upload media</a>{% endif %}
+  {% if perms.dialogues.add_guideassistant %}<a class="btn btn--small" href="{% url 'creator_studio:content_create' 'guides' %}">New guide assistant</a>{% endif %}
+  <a class="btn btn--ghost btn--small" href="{% url 'core:home' %}">Preview website</a>
+  <a class="btn btn--ghost btn--small" href="{% url 'creator_studio:publications' %}">Publication history</a>
+</div>
+
+<div class="stat-grid">
+  {% for label, value in totals.items %}<div class="stat"><div class="stat__value">{{ value }}</div><div class="stat__label">{{ label }}</div></div>{% endfor %}
+</div>
+<div class="stat-grid">
+  <div class="stat"><div class="stat__value">{{ status_counts.draft }}</div><div class="stat__label">Drafts</div></div>
+  <div class="stat"><div class="stat__value">{{ status_counts.in_review }}</div><div class="stat__label">Pending review</div></div>
+  <div class="stat"><div class="stat__value">{{ status_counts.approved }}</div><div class="stat__label">Approved</div></div>
+  <div class="stat"><div class="stat__value">{{ status_counts.scheduled }}</div><div class="stat__label">Scheduled</div></div>
+  <div class="stat"><div class="stat__value">{{ status_counts.published }}</div><div class="stat__label">Published</div></div>
+  <div class="stat"><div class="stat__value">{{ missing_translations }}</div><div class="stat__label"><a href="{% url 'creator_studio:localization_missing' %}">Missing translations</a></div></div>
+  <div class="stat"><div class="stat__value">{{ media.n|default:0 }}</div><div class="stat__label">Media files · {{ media.size|default:0|filesizeformat }}</div></div>
+</div>
+
+<div class="dash-grid">
+  <section class="panel">
+    <h2>Recently modified</h2>
+    <ul class="compact-list">
+      {% for section, obj in recent_rows %}<li><a href="{% url 'creator_studio:content_edit' section.key obj.pk %}">{{ obj }}</a><small>{{ section.label }} · {{ obj.updated_at|timesince }} ago {% status_badge obj %}</small></li>
+      {% empty %}<li class="muted">No content yet.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Recent activity</h2>
+    <ul class="compact-list">
+      {% for e in activity %}<li><span>{{ e.actor_label|default:"system" }} — {{ e.action }}{% if e.target_repr %}: {{ e.target_repr }}{% endif %}</span><small>{{ e.created_at|timesince }} ago</small></li>
+      {% empty %}<li class="muted">No activity recorded yet.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Pending review</h2>
+    <ul class="compact-list">
+      {% for obj in in_review %}{% with s=section_for %}<li>{{ obj }}<small>{{ obj.updated_at|date:"Y-m-d" }}</small></li>{% endwith %}
+      {% empty %}<li class="muted">Nothing is waiting for review.</li>{% endfor %}
+    </ul>
+    <h2 style="margin-block-start: 1rem">Scheduled</h2>
+    <ul class="compact-list">
+      {% for obj in scheduled %}<li>{{ obj }}<small>{{ obj.publish_at|date:"Y-m-d H:i" }} UTC</small></li>
+      {% empty %}<li class="muted">Nothing is scheduled.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="panel{% if incomplete or missing_portraits or broken_media %} panel--warn{% endif %}">
+    <h2>Needs attention</h2>
+    <ul class="compact-list">
+      {% for key, obj, problem in incomplete %}<li><a href="{% url 'creator_studio:content_edit' key obj.pk %}">{{ obj }}</a><small>{{ problem }}</small></li>{% endfor %}
+      {% for c in missing_portraits %}<li><a href="{% url 'creator_studio:content_edit' 'characters' c.pk %}">{{ c }}</a><small>No portrait (procedural sigil shown)</small></li>{% endfor %}
+      {% for a in broken_media %}<li><a href="{% url 'creator_studio:content_edit' 'media' a.pk %}">{{ a }}</a><small>File missing from storage</small></li>{% endfor %}
+      {% if not incomplete and not missing_portraits and not broken_media %}<li class="muted">Nothing needs attention.</li>{% endif %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

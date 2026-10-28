@@ -1,0 +1,27 @@
+{% load astravia %}{% url 'core:home' as home_url %}{% url 'worlds:list' as worlds_url %}{% url 'characters:list' as chars_url %}{% url 'narrative:arcs' as story_url %}{% url 'narrative:lore' as lore_url %}{% url 'announcements:list' as news_url %}{% url 'core:search' as search_url %}
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="wordmark" href="{{ home_url }}"><span class="wordmark__mark" aria-hidden="true"></span>{% if LANG == "ar" %}أسترافيا{% else %}ASTRAVIA{% endif %}</a>
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-nav">{% ui "nav.menu" %}</button>
+    <nav class="primary-nav" id="primary-nav" aria-label="{% ui 'nav.main_label' %}">
+      <ul>
+        <li><a href="{{ worlds_url }}" {% if request.path|slice:":8" == "/worlds/" %}aria-current="page"{% endif %}>{% ui "nav.worlds" %}</a></li>
+        <li><a href="{{ chars_url }}" {% if request.path|slice:":12" == "/characters/" %}aria-current="page"{% endif %}>{% ui "nav.characters_short" %}</a></li>
+        <li><a href="{{ story_url }}" {% if request.path|slice:":7" == "/story/" %}aria-current="page"{% endif %}>{% ui "nav.story" %}</a></li>
+        <li><a href="{{ lore_url }}" {% if request.path|slice:":6" == "/lore/" %}aria-current="page"{% endif %}>{% ui "nav.lore" %}</a></li>
+        <li><a href="{{ news_url }}" {% if request.path|slice:":6" == "/news/" %}aria-current="page"{% endif %}>{% ui "nav.news" %}</a></li>
+        <li><a href="{{ search_url }}" {% if request.path == search_url %}aria-current="page"{% endif %}>{% ui "nav.search" %}</a></li>
+        {% if user.is_authenticated %}
+          {% if can_access_studio %}<li><a href="{% url 'creator_studio:dashboard' %}">{% ui "nav.studio" %}</a></li>{% endif %}
+          <li><a href="{% url 'accounts:profile' %}">{% ui "nav.account" %}</a></li>
+        {% else %}
+          <li><a href="{% url 'accounts:login' %}">{% ui "nav.sign_in" %}</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    <div class="header-tools">
+      {% if site_config.ambient_audio %}<button class="btn btn--ghost btn--small" type="button" data-sound-toggle aria-pressed="false" data-label-on="{% ui 'sound.on' %}" data-label-off="{% ui 'sound.off' %}" hidden>{% ui "sound.on" %}</button>{% endif %}
+      <a class="lang-switch" href="?{% query_transform lang=OTHER_LANG %}" hreflang="{{ OTHER_LANG }}" lang="{{ OTHER_LANG }}">{% ui "lang.switch_to" %}</a>
+    </div>
+  </div>
+</header>

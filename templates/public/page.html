@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ page|loc:"title" }} — {% ui "site.name" %}{% endblock %}
+{% block content %}
+<article class="wrap wrap--narrow">
+  <header class="page-head"><h1>{{ page|loc:"title" }}</h1></header>
+  <div class="prose" lang="{{ page|loc_lang:'body' }}">{{ page|loc:"body"|linebreaks }}</div>
+</article>
+{% endblock %}

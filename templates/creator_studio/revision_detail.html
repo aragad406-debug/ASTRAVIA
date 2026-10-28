@@ -1,0 +1,15 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Revision {{ rev.revision_number }} — {{ obj }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_edit' section.key obj.pk %}">{{ obj }}</a> / <a href="{% url 'creator_studio:revision_list' section.key obj.pk %}">{% ui "studio.revisions" %}</a> /</p>
+<div class="studio-head">
+  <div><h1>Revision {{ rev.revision_number }}</h1><p>{{ rev.summary }} · {{ rev.author.email|default:"system" }} · {{ rev.created_at|date:"Y-m-d H:i" }}. Compared with the {{ compare_label }}.</p></div>
+  {% if can_restore %}<form method="post" action="{% url 'creator_studio:revision_restore' section.key obj.pk rev.revision_number %}" data-confirm="Restore revision {{ rev.revision_number }}? The current content will be replaced. The restore is saved as a new revision, so it can be undone.">{% csrf_token %}<button class="btn btn--gold" type="submit">{% ui "studio.restore" %}</button></form>{% endif %}
+</div>
+{% if changes %}
+<div class="table-wrap"><table class="data diff">
+  <thead><tr><th>Field</th><th>Revision {{ rev.revision_number }}</th><th>{{ compare_label|capfirst }}</th></tr></thead>
+  <tbody>{% for field, old, new in changes %}<tr><th scope="row">{{ field }}</th><td class="old">{{ old|default_if_none:"—" }}</td><td class="new">{{ new|default_if_none:"—" }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="empty-state">No differences.</p>{% endif %}
+{% endblock %}

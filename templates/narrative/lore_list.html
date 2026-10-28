@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "lore.title" %} — {% ui "site.name" %}{% endblock %}
+{% block description %}{% ui "lore.lead" %}{% endblock %}
+{% block content %}
+<div class="wrap page-head"><h1>{% ui "lore.title" %}</h1><p>{% ui "lore.lead" %}</p></div>
+<div class="wrap">
+  <form class="filters" method="get">
+    <div class="field"><label for="f-world">{% ui "search.filter.world" %}</label>
+      <select id="f-world" name="world"><option value="">{% ui "search.filter.any" %}</option>{% for w in worlds %}<option value="{{ w.slug }}" {% if world_filter == w.slug %}selected{% endif %}>{{ w|loc:"name" }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="f-type">{% ui "search.filter.type" %}</label>
+      <select id="f-type" name="type"><option value="">{% ui "search.filter.any" %}</option>{% for v, label in types %}<option value="{{ v }}" {% if type_filter == v %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <button class="btn btn--ghost" type="submit">{% ui "search.button" %}</button>
+  </form>
+  {% if page_obj.object_list %}
+  <div class="archive-grid">
+    {% for e in page_obj %}
+      {% if e.visibility == "teaser" %}
+      <div class="archive-item"><span class="archive-item__type">{{ e.get_entry_type_display }}</span><h2 class="archive-item__title">{{ e|loc:"title" }}</h2><p>{{ e|loc:"summary" }}</p></div>
+      {% else %}
+      <a class="archive-item" href="{{ e.get_absolute_url }}">
+        <span class="archive-item__type">{{ e.get_entry_type_display }} <span class="importance" aria-label="{{ e.get_importance_display }}">{% for i in "1234" %}<i class="{% if forloop.counter <= e.importance %}on{% endif %}"></i>{% endfor %}</span></span>
+        <h2 class="archive-item__title">{{ e|loc:"title" }}</h2>
+        <p>{{ e|loc:"summary" }}</p>
+        {% if e.timeline_label_en or e.timeline_label_ar %}<span class="archive-item__when">{{ e|loc:"timeline_label" }}</span>{% endif %}
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% include "partials/pagination.html" %}
+  {% else %}<p class="empty-state">{% ui "empty.lore" %}</p>{% endif %}
+</div>
+{% endblock %}

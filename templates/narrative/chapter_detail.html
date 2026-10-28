@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ chapter|loc:"title" }} — {{ arc|loc:"title" }} — {% ui "site.name" %}{% endblock %}
+{% block description %}{{ chapter|loc:"summary"|truncatechars:160 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ chapter|loc:"title" }}{% endblock %}
+{% block content %}
+<article class="wrap wrap--narrow">
+  <header class="page-head">
+    <p class="muted"><a href="{{ arc.get_absolute_url }}">{{ arc|loc:"title" }}</a> · {{ chapter.get_chapter_type_display }}</p>
+    <h1>{{ chapter|loc:"title" }}</h1>
+    <p>{{ chapter|loc:"summary" }}</p>
+  </header>
+  {% if chapter.is_spoiler and not request.is_preview %}
+    <p class="spoiler-note">{% ui "story.spoiler" %}</p>
+    <details class="reveal"><summary>{% if LANG == "ar" %}اقرأ الفصل رغم ذلك{% else %}Read the chapter anyway{% endif %}</summary>
+      <div class="story-text" lang="{{ chapter|loc_lang:'body' }}">{{ chapter|loc:"body"|linebreaks }}</div>
+      {% if chapter.closing_line_en or chapter.closing_line_ar %}<p class="closing-line" lang="{{ chapter|loc_lang:'closing_line' }}">{{ chapter|loc:"closing_line" }}</p>{% endif %}
+    </details>
+  {% else %}
+    <div class="story-text" lang="{{ chapter|loc_lang:'body' }}">{{ chapter|loc:"body"|linebreaks }}</div>
+    {% if chapter.closing_line_en or chapter.closing_line_ar %}<p class="closing-line" lang="{{ chapter|loc_lang:'closing_line' }}">{{ chapter|loc:"closing_line" }}</p>{% endif %}
+  {% endif %}
+  <nav class="chapter-nav" aria-label="{% ui 'story.chapters' %}">
+    {% if previous %}<a href="{{ previous.get_absolute_url }}" rel="prev"><small>{% ui "story.previous" %}</small>{{ previous|loc:"title" }}</a>{% endif %}
+    {% if next %}<a class="next" href="{{ next.get_absolute_url }}" rel="next"><small>{% ui "story.next" %}</small>{{ next|loc:"title" }}</a>{% else %}<a class="next" href="{{ arc.get_absolute_url }}"><small>{% ui "story.back_to_arc" %}</small>{{ arc|loc:"title" }}</a>{% endif %}
+  </nav>
+</article>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ quest|loc:"title" }} — {% ui "site.name" %}{% endblock %}
+{% block description %}{{ quest|loc:"summary"|truncatechars:160 }}{% endblock %}
+{% block content %}
+<article class="wrap wrap--narrow">
+  <header class="page-head">
+    <p class="muted">{{ quest.get_quest_type_display }}{% if quest.world %} · <a href="{{ quest.world.get_absolute_url }}">{{ quest.world|loc:"name" }}</a>{% endif %}</p>
+    <h1>{{ quest|loc:"title" }}</h1>
+    <p>{{ quest|loc:"summary" }}</p>
+  </header>
+  {% if quest.description_en or quest.description_ar %}<div class="prose">{{ quest|loc:"description"|linebreaks }}</div>{% endif %}
+  {% if objectives %}
+  <h2>{% ui "quest.objectives" %}</h2>
+  <ul class="objectives">
+    {% for o in objectives %}<li>{{ o|loc:"description" }}{% if o.required_count > 1 %} ({{ o.required_count }}){% endif %}{% if o.is_optional %} <span class="tag">{% ui "quest.optional" %}</span>{% endif %}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</article>
+{% endblock %}

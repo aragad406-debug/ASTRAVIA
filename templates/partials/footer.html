@@ -1,0 +1,50 @@
+{% load astravia %}
+<footer class="site-footer" id="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="wordmark" href="{% url 'core:home' %}"><span class="wordmark__mark" aria-hidden="true"></span>{% if LANG == "ar" %}أسترافيا{% else %}ASTRAVIA{% endif %}</a>
+        <p class="footer-status" style="margin-block-start: 1rem"><strong>{% ui "footer.status" %}:</strong> {{ site_config|loc:"project_status" }}</p>
+        {% if site_config.newsletter_enabled %}
+        <form class="stack" method="post" action="{% url 'core:newsletter' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label for="newsletter-email">{% ui "footer.newsletter" %}</label>
+          <div class="newsletter">
+            <input id="newsletter-email" type="email" name="email" required autocomplete="email" placeholder="{% ui 'footer.newsletter.email' %}">
+            <button class="btn btn--small" type="submit">{% ui "footer.newsletter.button" %}</button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+      <nav aria-label="{% ui 'footer.explore' %}">
+        <h2>{% ui "footer.explore" %}</h2>
+        <ul>
+          <li><a href="{% url 'worlds:list' %}">{% ui "nav.worlds" %}</a></li>
+          <li><a href="{% url 'characters:list' %}">{% ui "nav.characters_short" %}</a></li>
+          <li><a href="{% url 'narrative:arcs' %}">{% ui "nav.story" %}</a></li>
+          <li><a href="{% url 'narrative:lore' %}">{% ui "nav.lore" %}</a></li>
+          <li><a href="{% url 'announcements:list' %}">{% ui "nav.news" %}</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="{% ui 'footer.legal' %}">
+        <h2>{% ui "footer.legal" %}</h2>
+        <ul>
+          {% for p in footer_pages %}<li><a href="{{ p.get_absolute_url }}">{{ p|loc:"title" }}</a></li>{% endfor %}
+        </ul>
+      </nav>
+      <div>
+        <h2>{% ui "footer.contact" %}</h2>
+        <ul>
+          {% if site_config.contact_email %}<li><a href="mailto:{{ site_config.contact_email }}">{{ site_config.contact_email }}</a></li>{% endif %}
+          {% for link in site_config.social_links %}<li><a href="{{ link.url }}" rel="noopener noreferrer me" target="_blank">{{ link.label }}</a></li>{% endfor %}
+          <li><a href="?{% query_transform lang=OTHER_LANG %}" lang="{{ OTHER_LANG }}">{% ui "lang.label" %}: {% ui "lang.switch_to" %}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {% now "Y" %} {{ site_config.copyright_holder }}. {% ui "footer.rights" %}</span>
+      {% if not user.is_authenticated %}<a href="{% url 'accounts:register' %}">{% ui "nav.register" %}</a>{% endif %}
+    </div>
+  </div>
+</footer>

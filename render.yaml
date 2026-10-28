@@ -1,0 +1,76 @@
+# Render Blueprint for ASTRAVIA. Review before applying: creating these services may incur cost.
+# Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+databases:
+  - name: astravia-db
+    databaseName: astravia
+    user: astravia
+    plan: basic-256mb          # choose the plan you want; free databases expire
+
+services:
+  - type: web
+    name: astravia
+    runtime: python
+    plan: starter
+    buildCommand: ./build.sh
+    preDeployCommand: python manage.py migrate --noinput && python manage.py createcachetable
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60 --access-logfile -
+    healthCheckPath: /healthz/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: astravia-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ""                # add your custom domain here once it exists
+      - key: CSRF_TRUSTED_ORIGINS
+        value: ""                # e.g. https://www.your-domain.example
+      - key: SITE_URL
+        value: ""
+      - key: MEDIA_STORAGE
+        value: local             # "s3" for object storage (recommended), or keep "local" with the disk below
+      - key: MEDIA_ROOT
+        value: /var/data/media
+      - key: SERVE_MEDIA
+        value: "True"
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: ASTRAVIA_OWNER_EMAIL
+        sync: false
+      - key: ASTRAVIA_OWNER_PASSWORD
+        sync: false
+    disk:                        # persistent disk for uploaded media when MEDIA_STORAGE=local
+      name: astravia-media
+      mountPath: /var/data
+      sizeGB: 5
+
+  - type: cron
+    name: astravia-publish-scheduled
+    runtime: python
+    plan: starter
+    schedule: "*/10 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py publish_scheduled
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: astravia
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: astravia-db
+          property: connectionString

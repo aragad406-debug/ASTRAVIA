@@ -1,0 +1,20 @@
+{% load static astravia %}<!doctype html>
+<html lang="{{ LANG }}" dir="{{ DIR }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
+<title>{% ui "studio.sign_in" %} — {% ui "studio.name" %}</title>
+<link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'css/astravia.css' %}"><link rel="stylesheet" href="{% static 'css/studio.css' %}"></head>
+<body class="studio">
+<main class="login-shell">
+  <div class="login-card">
+    <a class="wordmark" href="{% url 'core:home' %}"><span class="wordmark__mark" aria-hidden="true"></span>ASTRAVIA</a>
+    <h1 style="margin-top:1.25rem">{% ui "studio.sign_in" %}</h1>
+    <form method="post" novalidate>{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn" type="submit" style="inline-size:100%">{% ui "account.sign_in.button" %}</button>
+    </form>
+    <p style="margin-top:1rem"><a href="{% url 'accounts:password_reset' %}">{% ui "account.forgot" %}</a></p>
+  </div>
+</main>
+</body></html>

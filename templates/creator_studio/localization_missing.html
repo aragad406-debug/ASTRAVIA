@@ -1,0 +1,18 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Missing translations — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Missing translations</h1><p>{{ page_obj.paginator.count }} field{{ page_obj.paginator.count|pluralize }}</p></div></div>
+<form class="toolbar" method="get">
+  <div class="field"><label for="section">Content</label><select id="section" name="section"><option value="">All</option>{% for s in sections %}<option value="{{ s.key }}" {% if key == s.key %}selected{% endif %}>{{ s.label }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="lang">Missing language</label><select id="lang" name="lang"><option value="">Either</option><option value="ar" {% if lang == "ar" %}selected{% endif %}>Arabic</option><option value="en" {% if lang == "en" %}selected{% endif %}>English</option></select></div>
+  <button class="btn btn--ghost btn--small" type="submit">Apply</button>
+</form>
+{% if page_obj.object_list %}
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Record</th><th>Content</th><th>Field</th><th>Missing</th><th></th></tr></thead>
+  <tbody>{% for r in page_obj %}<tr><td>{{ r.obj }}</td><td>{{ r.section.label }}</td><td>{{ r.field }}</td><td>{{ r.lang|upper }}</td>
+  <td><a href="{% url 'creator_studio:content_edit' r.section.key r.obj.pk %}">Edit</a> · <a href="{% url 'creator_studio:localization_compare' r.section.key r.obj.pk %}">Compare</a></td></tr>{% endfor %}</tbody>
+</table></div>
+{% include "partials/pagination.html" %}
+{% else %}<p class="empty-state">No missing translations.</p>{% endif %}
+{% endblock %}

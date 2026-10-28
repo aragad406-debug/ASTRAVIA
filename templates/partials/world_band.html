@@ -1,0 +1,18 @@
+{% load astravia %}<article class="world-band theme-{{ world.theme }}" style="--w1: {{ world.color_primary }}; --w2: {{ world.color_secondary }}; --w3: {{ world.color_accent }}" aria-labelledby="world-{{ world.slug }}">
+  <div class="world-band__inner">
+    <h3 class="world-band__name" id="world-{{ world.slug }}">{{ world|loc:"name" }}</h3>
+    <p class="world-band__tagline">{{ world|loc:"tagline" }}</p>
+    <p class="world-band__desc">{{ world|loc:"short_description" }}</p>
+    <dl class="world-band__facts">
+      {% if world.ruler and world.ruler.visibility == "public" and world.ruler.is_live %}<div><dt>{% ui "home.world.ruler" %}</dt><dd>{{ world.ruler|loc:"name" }}</dd></div>{% endif %}
+      {% if world.capital_en or world.capital_ar %}<div><dt>{% ui "home.world.capital" %}</dt><dd>{{ world|loc:"capital" }}</dd></div>{% endif %}
+    </dl>
+    {% if world.lore_teaser_en or world.lore_teaser_ar %}<p class="world-band__teaser">{{ world|loc:"lore_teaser" }}</p>{% endif %}
+    <a class="btn btn--ghost" href="{{ world.get_absolute_url }}">{% ui "home.world.enter" %} {{ world|loc:"name" }}</a>
+  </div>
+  <div class="world-band__planet">
+    {% if world.hero_image and world.hero_image.url %}
+      <div class="media-frame planet" ><img src="{{ world.hero_image.url }}" alt="{{ world.hero_image|loc:'alt_text' }}" loading="lazy" decoding="async"></div>
+    {% else %}<div class="planet" aria-hidden="true"></div>{% endif %}
+  </div>
+</article>

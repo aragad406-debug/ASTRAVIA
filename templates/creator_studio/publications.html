@@ -1,0 +1,11 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Publication history — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Publication history</h1></div></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>When (UTC)</th><th>Content</th><th>Type</th><th>Action</th><th>Status</th><th>By</th></tr></thead>
+  <tbody>{% for r in page_obj %}<tr><td class="num">{{ r.created_at|date:"Y-m-d H:i" }}</td><td>{{ r.object_repr }}</td><td>{{ r.content_type.model }}</td><td>{{ r.get_action_display }}</td><td>{{ r.from_status }} → {{ r.to_status }}</td><td>{{ r.actor.email|default:"system" }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="muted">No publication events yet. Seeded content was created already published.</td></tr>{% endfor %}</tbody>
+</table></div>
+{% include "partials/pagination.html" %}
+{% endblock %}

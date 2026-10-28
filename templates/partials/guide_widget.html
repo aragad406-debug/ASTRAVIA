@@ -1,0 +1,23 @@
+{% load astravia static %}{% with guide=primary_guide %}{% if guide %}
+<div class="guide-widget guide-widget--{{ guide.display_position }}" data-guide
+     data-endpoint="{% url 'api:guide-lines' guide.slug %}" data-page="{{ page_context|default:'any' }}"
+     {% if world_slug %}data-world="{{ world_slug }}"{% endif %} data-voice="off"
+     data-empty-text="{% ui 'guide.unavailable' %}">
+  <div class="guide-panel" data-guide-panel hidden role="dialog" aria-labelledby="guide-name" aria-modal="false">
+    <div class="guide-panel__head">
+      {% include "partials/sigil.html" with person=guide.character size="small" %}
+      <p class="guide-panel__name" id="guide-name">{{ guide.character|loc:"name" }}</p>
+      <button class="guide-panel__close" type="button" data-guide-close aria-label="{% ui 'guide.close' %}">×</button>
+    </div>
+    <p class="guide-panel__text" data-guide-text aria-live="polite"></p>
+    <div class="guide-panel__actions">
+      <span class="guide-panel__progress" data-guide-progress></span>
+      <button class="btn btn--small" type="button" data-guide-next>{% ui "guide.next" %}</button>
+    </div>
+  </div>
+  <button class="guide-orb" type="button" data-guide-open aria-expanded="false" aria-label="{% ui 'guide.open' %}: {{ guide.character|loc:'name' }}">
+    {% if guide.character.portrait and guide.character.portrait.url %}<img src="{{ guide.character.portrait.url }}" alt="">{% endif %}
+  </button>
+</div>
+<script src="{% static 'js/guide.js' %}" defer></script>
+{% endif %}{% endwith %}

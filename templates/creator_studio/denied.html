@@ -1,0 +1,10 @@
+{% load static astravia %}<!doctype html>
+<html lang="{{ LANG }}" dir="{{ DIR }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>{% ui "error.403.title" %}</title><link rel="stylesheet" href="{% static 'css/astravia.css' %}"><link rel="stylesheet" href="{% static 'css/studio.css' %}"></head>
+<body class="studio"><main class="login-shell"><div class="login-card">
+  <h1>{% ui "error.403.title" %}</h1>
+  <p class="muted">Your account ({{ user.email }}) doesn't have access to the Creator Studio. Ask the studio owner to assign you a role.</p>
+  <p class="cluster"><a class="btn btn--ghost" href="{% url 'core:home' %}">{% ui "error.home" %}</a>
+  <form method="post" action="{% url 'creator_studio:logout' %}">{% csrf_token %}<button class="btn btn--ghost" type="submit">{% ui "nav.sign_out" %}</button></form></p>
+</div></main></body></html>

@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}API — {% ui "site.name" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block guide %}{% endblock %}
+{% block content %}
+<div class="wrap wrap--narrow page-head"><h1>ASTRAVIA Content API v1</h1><p>Read-only, published content for the website and the future Unreal Engine 5 client. Machine-readable schema: <a href="{% url 'api:schema' %}">OpenAPI JSON</a>.</p></div>
+<div class="wrap wrap--narrow prose" dir="ltr" lang="en">
+  <h2>Conventions</h2>
+  <p>All responses are JSON. Localized text is returned as <code>{"en": "...", "ar": "..."}</code>. Lists are paginated (<code>?page=</code>, <code>?page_size=</code> up to 100). Only published content is returned. Hidden content requires an authenticated principal with the <code>core.view_hidden_content</code> permission (token authentication: <code>Authorization: Token &lt;key&gt;</code>). Never ship a privileged token inside a game client.</p>
+  <h2>Endpoints</h2>
+  <ul class="link-list">
+    <li><a href="{% url 'api:root' %}">/api/v1/</a><small>Index of endpoints</small></li>
+    <li><a href="{% url 'api:world-list' %}">/api/v1/worlds/</a><small>Worlds; detail at /api/v1/worlds/&lt;slug&gt;/ includes regions and Unreal level path</small></li>
+    <li><a href="{% url 'api:character-list' %}">/api/v1/characters/</a><small>?world=, ?category=; detail includes biography and relationships</small></li>
+    <li><a href="{% url 'api:quest-list' %}">/api/v1/quests/</a><small>Detail includes objectives, prerequisites and rewards</small></li>
+    <li><a href="{% url 'api:dialogue-list' %}">/api/v1/dialogues/</a><small>?world=, ?quest=, ?speaker=, ?category=, ?trigger=; detail by key</small></li>
+    <li><a href="{% url 'api:lore-list' %}">/api/v1/lore/</a><small>Memory archive</small></li>
+    <li><a href="{% url 'api:cinematic-list' %}">/api/v1/cinematics/</a><small>Storyboards and Unreal sequence references</small></li>
+    <li><a href="{% url 'api:encounter-list' %}">/api/v1/encounters/</a><small>Boss encounter data with phases</small></li>
+    <li><a href="{% url 'api:storyarc-list' %}">/api/v1/story-arcs/</a><small>Detail lists chapters; /story-arcs/&lt;arc&gt;/chapters/&lt;chapter&gt;/ returns the branching graph</small></li>
+    <li><a href="{% url 'api:guide-list' %}">/api/v1/guides/</a><small>/guides/&lt;slug&gt;/lines/?page=home&amp;world=everfrost&amp;lang=ar</small></li>
+    <li><a href="{% url 'api:localization' %}">/api/v1/localization/</a><small>Interface strings and glossary</small></li>
+    <li><a href="{% url 'api:site-config' %}">/api/v1/site-config/</a><small>Public site configuration</small></li>
+    <li><code>POST /api/v1/auth/token/</code><small>Exchange email and password for a token (rate limited)</small></li>
+    <li><code>GET /api/v1/me/</code>, <code>GET /api/v1/me/quests/&lt;slug&gt;/</code>, <code>POST /api/v1/me/quests/&lt;slug&gt;/start/</code><small>Player endpoints; the server validates every state change</small></li>
+  </ul>
+</div>
+{% endblock %}

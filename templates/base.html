@@ -1,0 +1,49 @@
+{% load static astravia %}<!doctype html>
+<html lang="{{ LANG }}" dir="{{ DIR }}" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% ui "site.name" %}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site_config|loc:'hero_intro'|truncatechars:160 }}{% endblock %}">
+  {% block robots %}{% endblock %}
+  {% with request.path as p %}
+  <link rel="canonical" href="{% absolute_url p %}">
+  <link rel="alternate" hreflang="en" href="{% absolute_url p %}?lang=en">
+  <link rel="alternate" hreflang="ar" href="{% absolute_url p %}?lang=ar">
+  <meta property="og:url" content="{% absolute_url p %}">
+  {% endwith %}
+  <meta property="og:site_name" content="{% ui 'site.name' %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{% ui 'site.name' %}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site_config|loc:'hero_intro'|truncatechars:200 }}{% endblock %}">
+  <meta property="og:locale" content="{% if LANG == 'ar' %}ar_AR{% else %}en_US{% endif %}">
+  {% block og_image %}<meta property="og:image" content="{% absolute_url '' %}{% static 'images/og-default.png' %}">{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#050611">
+  <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preload" href="{% static 'fonts/marcellus.woff' %}" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="{% if LANG == 'ar' %}{% static 'fonts/plexarabic-regular.woff' %}{% else %}{% static 'fonts/jost-var.woff' %}{% endif %}" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/astravia.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">{% ui "nav.skip" %}</a>
+  <canvas id="cosmos" aria-hidden="true"></canvas>
+  {% if request.is_preview %}<div class="preview-banner" role="status">Preview — this content is not published. Only studio members can see this page.</div>{% endif %}
+  {% include "partials/header.html" %}
+  {% if messages %}
+  <div class="wrap"><ul class="messages" role="status">
+    {% for message in messages %}<li class="message message--{{ message.tags }}">{{ message }}</li>{% endfor %}
+  </ul></div>
+  {% endif %}
+  <main id="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "partials/footer.html" %}
+  {% block guide %}{% include "partials/guide_widget.html" %}{% endblock %}
+  {% if site_config.ambient_audio %}<audio id="ambient-audio" src="{{ site_config.ambient_audio.url }}" loop preload="none"></audio>{% endif %}
+  <script src="{% static 'js/site.js' %}" defer></script>
+  <script src="{% static 'js/cosmos.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

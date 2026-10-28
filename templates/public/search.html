@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "search.title" %} — {% ui "site.name" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex, follow">{% endblock %}
+{% block content %}
+<div class="wrap wrap--narrow page-head"><h1>{% ui "search.title" %}</h1></div>
+<div class="wrap wrap--narrow">
+  <form method="get" role="search">
+    <div class="search-form">
+      <label class="visually-hidden" for="q">{% ui "search.title" %}</label>
+      <input id="q" type="search" name="q" value="{{ query }}" placeholder="{% ui 'search.placeholder' %}" maxlength="120" autocomplete="off">
+      <button class="btn" type="submit">{% ui "search.button" %}</button>
+    </div>
+    <div class="filters">
+      <div class="field"><label for="type">{% ui "search.filter.type" %}</label>
+        <select id="type" name="type"><option value="">{% ui "search.filter.any" %}</option>{% for t in types %}{% with "type."|add:t as key %}<option value="{{ t }}" {% if kind == t %}selected{% endif %}>{% ui key %}</option>{% endwith %}{% endfor %}</select></div>
+      <div class="field"><label for="world">{% ui "search.filter.world" %}</label>
+        <select id="world" name="world"><option value="">{% ui "search.filter.any" %}</option>{% for w in worlds %}<option value="{{ w.slug }}" {% if world_slug == w.slug %}selected{% endif %}>{{ w|loc:"name" }}</option>{% endfor %}</select></div>
+    </div>
+  </form>
+  {% if query %}
+    <p role="status">{% if result_count %}{% ui "search.results" n=result_count q=query %}{% else %}{% ui "search.none" q=query %}{% endif %}</p>
+    {% if page_obj.object_list %}
+    <ul class="rows">
+      {% for r in page_obj %}{% with obj=r.obj %}{% with "type."|add:r.type as key %}
+      <li class="row">
+        <span class="row__meta result-type">{% ui key %}</span>
+        <div>
+          <h2 class="row__title"><a href="{{ obj.get_absolute_url }}">{% if r.type == "world" or r.type == "character" %}{{ obj|loc:"name" }}{% else %}{{ obj|loc:"title" }}{% endif %}</a></h2>
+          <p>{% if r.type == "world" %}{{ obj|loc:"tagline" }}{% elif r.type == "character" %}{{ obj|loc:"teaser" }}{% else %}{{ obj|loc:"summary"|truncatewords:30 }}{% endif %}</p>
+        </div>
+      </li>
+      {% endwith %}{% endwith %}{% endfor %}
+    </ul>
+    {% include "partials/pagination.html" %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

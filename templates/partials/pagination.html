@@ -1,0 +1,7 @@
+{% load astravia %}{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Pagination">
+  {% if page_obj.has_previous %}<a class="btn btn--ghost btn--small" href="?{% query_transform page=page_obj.previous_page_number %}" rel="prev">{% ui "pagination.previous" %}</a>{% else %}<span></span>{% endif %}
+  <span>{% ui "pagination.page" n=page_obj.number total=page_obj.paginator.num_pages %}</span>
+  {% if page_obj.has_next %}<a class="btn btn--ghost btn--small" href="?{% query_transform page=page_obj.next_page_number %}" rel="next">{% ui "pagination.next" %}</a>{% else %}<span></span>{% endif %}
+</nav>
+{% endif %}

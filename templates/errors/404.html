@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "error.404.title" %} — {% ui "site.name" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block guide %}{% endblock %}
+{% block content %}
+<div class="wrap error-page">
+  <div>
+    <p class="error-page__code" aria-hidden="true">404</p>
+    <h1>{% ui "error.404.title" %}</h1>
+    <p class="muted">{% ui "error.404.text" %}</p>
+    <p><a class="btn" href="/">{% ui "error.home" %}</a></p>
+  </div>
+</div>
+{% endblock %}

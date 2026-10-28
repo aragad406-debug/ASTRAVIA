@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "account.profile.title" %} — {% ui "site.name" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="wrap wrap--narrow page-head">
+  <h1>{% ui "account.profile.title" %}</h1>
+  <p>{{ user.email }} {% if user.email_verified %}<span class="badge badge--published">{% ui "account.verified" %}</span>{% endif %}</p>
+</div>
+<div class="wrap wrap--narrow stack">
+  {% if not user.email_verified %}
+  <div class="notice">
+    <p>{% ui "account.verify.pending" %}</p>
+    <form method="post" action="{% url 'accounts:resend_verification' %}">{% csrf_token %}<button class="btn btn--small" type="submit">{% ui "account.verify.resend" %}</button></form>
+  </div>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <button class="btn" type="submit">{% ui "account.profile.save" %}</button>
+  </form>
+  <hr>
+  <section><h2>{% ui "account.security" %}</h2>
+    <div class="cluster">
+      <a class="btn btn--ghost" href="{% url 'accounts:password_change' %}">{% ui "account.change_password" %}</a>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn--ghost" type="submit">{% ui "nav.sign_out" %}</button></form>
+    </div>
+  </section>
+  <hr>
+  <section><h2>{% ui "account.delete.title" %}</h2>
+    {% if pending_deletion %}<p class="notice">{% ui "account.delete.pending" %}</p>
+    {% else %}
+    <p class="muted">{% ui "account.delete.lead" %}</p>
+    <form method="post" action="{% url 'accounts:request_deletion' %}" data-confirm="{% ui 'account.delete.title' %}?">{% csrf_token %}
+      {% with form=deletion_form %}{% include "partials/form_fields.html" %}{% endwith %}
+      <button class="btn btn--danger" type="submit">{% ui "account.delete.button" %}</button>
+    </form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

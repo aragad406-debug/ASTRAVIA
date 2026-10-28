@@ -1,0 +1,17 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Interface text — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Interface text</h1><p>Buttons, labels and messages. Overrides take effect within a few minutes. Clear both fields to restore the default.</p></div></div>
+<form class="toolbar" method="get"><div class="field"><label for="q">{% ui "studio.search" %}</label><input id="q" type="search" name="q" value="{{ q }}"></div><button class="btn btn--ghost btn--small">Filter</button></form>
+{% for r in rows %}
+<form method="post" class="panel" id="k-{{ r.key }}">{% csrf_token %}
+  <input type="hidden" name="key" value="{{ r.key }}"><input type="hidden" name="q" value="{{ q }}">
+  <div class="cluster" style="justify-content:space-between"><code>{{ r.key }}</code>{% if r.override %}<span class="badge badge--approved">Overridden</span>{% endif %}</div>
+  <div class="form-grid" style="margin-top:.5rem">
+    <div class="field"><label>English <span class="helptext-inline">default: {{ r.en }}</span></label><input name="text_en" value="{{ r.override.text_en|default:'' }}" placeholder="{{ r.en }}" {% if not can_edit %}disabled{% endif %}></div>
+    <div class="field"><label>Arabic <span class="helptext-inline" lang="ar">الافتراضي: {{ r.ar }}</span></label><input name="text_ar" dir="rtl" lang="ar" value="{{ r.override.text_ar|default:'' }}" placeholder="{{ r.ar }}" {% if not can_edit %}disabled{% endif %}></div>
+  </div>
+  {% if can_edit %}<button class="btn btn--ghost btn--small" type="submit">Save</button>{% endif %}
+</form>
+{% empty %}<p class="empty-state">No interface text matches “{{ q }}”.</p>{% endfor %}
+{% endblock %}

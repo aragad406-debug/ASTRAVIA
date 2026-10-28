@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ character|loc:"name" }} — {% ui "site.name" %}{% endblock %}
+{% block description %}{{ character|loc:"teaser"|truncatechars:160 }}{% endblock %}
+{% block og_type %}profile{% endblock %}
+{% block og_title %}{{ character|loc:"name" }}, {{ character|loc:"title" }}{% endblock %}
+{% block og_image %}{% if character.portrait and character.portrait.url and not teaser %}<meta property="og:image" content="{% absolute_url character.portrait.url %}">{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block content %}
+<div class="wrap character-hero" style="--c: {{ character.signature_color }}">
+  {% if teaser %}<span class="sigil sigil--large" style="--c: {{ character.signature_color }}; filter: grayscale(.6) brightness(.7)" aria-hidden="true"></span>
+  {% else %}{% include "partials/sigil.html" with person=character size="large" %}{% endif %}
+  <div>
+    <h1>{{ character|loc:"name" }}</h1>
+    <p class="character-hero__title">{{ character|loc:"title" }}</p>
+    <p class="section__lead">{{ character|loc:"teaser" }}</p>
+  </div>
+</div>
+{% if teaser %}
+<div class="wrap"><div class="sealed"><p>{% ui "error.403.text" %}</p></div></div>
+{% else %}
+<div class="wrap">
+  <div class="split">
+    <div>
+      {% if character.biography_en or character.biography_ar %}
+      <section aria-labelledby="bio"><h2 id="bio">{% ui "character.biography" %}</h2><div class="story-text">{{ character|loc:"biography"|linebreaks }}</div></section>
+      {% endif %}
+      {% if character.personality_en or character.personality_ar %}<section><h2>{% ui "character.personality" %}</h2><div class="prose">{{ character|loc:"personality"|linebreaks }}</div></section>{% endif %}
+      {% if character.motivation_en or character.motivation_ar %}<section><h2>{% ui "character.motivation" %}</h2><div class="prose">{{ character|loc:"motivation"|linebreaks }}</div></section>{% endif %}
+      {% if character.fears_en or character.fears_ar %}<section><h2>{% ui "character.fears" %}</h2><div class="prose">{{ character|loc:"fears"|linebreaks }}</div></section>{% endif %}
+      {% if gallery %}
+      <section><div class="character-grid">{% for img in gallery %}<div class="media-frame"><img src="{{ img.url }}" alt="{{ img|loc:'alt_text' }}" loading="lazy"></div>{% endfor %}</div></section>
+      {% endif %}
+    </div>
+    <aside>
+      <dl class="facts">
+        {% if world %}<div><dt>{% ui "character.world" %}</dt><dd><a href="{{ world.get_absolute_url }}">{{ world|loc:"name" }}</a></dd></div>{% endif %}
+        <div><dt>{% ui "character.age" %}</dt><dd>
+          {% if character.age_is_unknown or not character.age_years %}{% ui "character.age_unknown" %}{% else %}{% ui "character.age_years" n=character.age_years %}{% endif %}
+          {% if character.transformation_age %}<br><span class="muted">{% ui "character.transformed_at" n=character.transformation_age %}</span>{% endif %}
+        </dd></div>
+        {% if character.appearance_en or character.appearance_ar %}<div><dt>{% ui "character.appearance" %}</dt><dd>{{ character|loc:"appearance" }}</dd></div>{% endif %}
+      </dl>
+      {% if relationships %}
+      <section><h2 style="font-size: var(--step-1)">{% ui "character.relationships" %}</h2>
+        <ul class="link-list">{% for label, other, rel in relationships %}<li><small>{{ label }}</small><a href="{{ other.get_absolute_url }}">{{ other|loc:"name" }}</a>{% if rel.description_en or rel.description_ar %}<small>{{ rel|loc:"description" }}</small>{% endif %}</li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+      {% if chapters %}
+      <section><h2 style="font-size: var(--step-1)">{% ui "story.chapters" %}</h2>
+        <ul class="link-list">{% for ch in chapters %}<li><a href="{{ ch.get_absolute_url }}">{{ ch|loc:"title" }}</a><small>{{ ch.arc|loc:"title" }}</small></li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

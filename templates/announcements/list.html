@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "news.title" %} — {% ui "site.name" %}{% endblock %}
+{% block content %}
+<div class="wrap page-head"><h1>{% ui "news.title" %}</h1></div>
+<div class="wrap">
+  <nav class="chip-nav" aria-label="Filter">
+    <a class="chip" href="?{% query_transform category='' page='' %}" {% if not category %}aria-current="true"{% endif %}>{% ui "characters.filter.all" %}</a>
+    {% for v, label in categories %}<a class="chip" href="?{% query_transform category=v page='' %}" {% if category == v %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+  {% if page_obj.object_list %}
+  <ul class="rows">
+    {% for item in page_obj %}
+    <li class="row">
+      <time class="row__meta" datetime="{{ item.display_date|date:'c' }}">{{ item.display_date|date:"j M Y" }}<br>{{ item.get_category_display }}</time>
+      <div><h2 class="row__title"><a href="{{ item.get_absolute_url }}">{{ item|loc:"title" }}</a></h2><p>{{ item|loc:"summary" }}</p></div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% include "partials/pagination.html" %}
+  {% else %}<p class="empty-state">{% ui "news.empty" %}</p>{% endif %}
+</div>
+{% endblock %}

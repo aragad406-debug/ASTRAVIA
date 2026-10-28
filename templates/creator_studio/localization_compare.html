@@ -1,0 +1,20 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Compare — {{ obj }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:localization' %}">Localization</a> / <a href="{% url 'creator_studio:content_edit' section.key obj.pk %}">{{ obj }}</a> /</p>
+<div class="studio-head"><div><h1>Compare translations</h1><p>Mark fields as reviewed. A review becomes stale automatically when either language changes.</p></div></div>
+<form method="post">{% csrf_token %}
+{% for f in fields %}
+<section class="panel">
+  <div class="cluster" style="justify-content:space-between"><h2 style="margin:0">{{ f.name }}</h2>
+    <span class="review-state review-state--{{ f.state }}">{{ f.state|capfirst }}</span></div>
+  <div class="compare" style="margin-block:.75rem">
+    <div lang="en" dir="ltr" class="{% if not f.en %}empty{% endif %}">{{ f.en|default:"Missing English" }}</div>
+    <div lang="ar" dir="rtl" class="{% if not f.ar %}empty{% endif %}">{{ f.ar|default:"الترجمة العربية ناقصة" }}</div>
+  </div>
+  {% if f.en and f.ar %}<label class="check"><input type="checkbox" name="reviewed" value="{{ f.name }}"> Mark as reviewed</label>{% endif %}
+</section>
+{% endfor %}
+{% if perms.localization.add_translationreview %}<div class="form-actions"><button class="btn" type="submit">Save review</button><a class="btn btn--ghost" href="{% url 'creator_studio:content_edit' section.key obj.pk %}">Edit texts</a></div>{% endif %}
+</form>
+{% endblock %}

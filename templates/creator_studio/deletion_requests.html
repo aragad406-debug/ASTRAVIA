@@ -1,0 +1,14 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Deletion requests — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Account deletion requests</h1><p>Completing a request permanently deletes the account, its profile and its game progress. Audit records keep only the email label.</p></div></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Requested</th><th>Account</th><th>Reason</th><th></th></tr></thead>
+  <tbody>{% for r in pending %}<tr><td class="num">{{ r.created_at|date:"Y-m-d H:i" }}</td><td>{{ r.email_snapshot }}</td><td>{{ r.reason|default:"—" }}</td>
+  <td class="cluster">
+    <form method="post" data-confirm="Permanently delete {{ r.email_snapshot }}?">{% csrf_token %}<input type="hidden" name="request_id" value="{{ r.pk }}"><button class="btn btn--danger btn--small" name="decision" value="complete">Delete account</button></form>
+    <form method="post">{% csrf_token %}<input type="hidden" name="request_id" value="{{ r.pk }}"><button class="btn btn--ghost btn--small" name="decision" value="cancel">Cancel request</button></form>
+  </td></tr>{% empty %}<tr><td colspan="4" class="muted">No pending requests.</td></tr>{% endfor %}</tbody>
+</table></div>
+{% if processed %}<h2 style="margin-top:2rem">Processed</h2><ul class="compact-list">{% for r in processed %}<li>{{ r.email_snapshot }}<small>{{ r.get_status_display }} · {{ r.processed_at|date:"Y-m-d" }} · {{ r.processed_by.email|default:"" }}</small></li>{% endfor %}</ul>{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Localization — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head">
+  <div><h1>Localization studio</h1><p>Arabic and English side by side. A field is "missing" when it is written in one language only.</p></div>
+  <div class="cluster">
+    <a class="btn btn--ghost btn--small" href="{% url 'creator_studio:localization_export' %}">Export all</a>
+    <a class="btn btn--ghost btn--small" href="{% url 'creator_studio:localization_export' %}?missing=1">Export missing only</a>
+    <a class="btn btn--small" href="{% url 'creator_studio:localization_import' %}">Import</a>
+  </div>
+</div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Content</th><th>Records</th><th>Records with gaps</th><th>Missing fields</th><th></th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td>{{ r.section.label }}</td><td class="num">{{ r.total }}</td><td class="num">{{ r.missing_records }}</td><td class="num">{{ r.missing_fields }}</td>
+  <td>{% if r.missing_fields %}<a href="{% url 'creator_studio:localization_missing' %}?section={{ r.section.key }}">Review gaps</a>{% else %}<span class="muted">Complete</span>{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>
+<p class="helptext-inline" style="margin-top:1rem">Preview right-to-left and left-to-right layouts with the language switch at the top of the page, or open any public page with <code>?lang=ar</code>.</p>
+{% endblock %}

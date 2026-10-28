@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "worlds.title" %} — {% ui "site.name" %}{% endblock %}
+{% block description %}{% ui "worlds.lead" %}{% endblock %}
+{% block content %}
+<div class="wrap page-head">
+  <h1>{% ui "worlds.title" %}</h1>
+  <p>{% ui "worlds.lead" %}</p>
+</div>
+{% if worlds %}
+<div class="world-bands">
+  {% for world in worlds %}
+    {% if world.visibility == "teaser" %}
+    <article class="world-band theme-{{ world.theme }}" style="--w1: {{ world.color_primary }}; --w2: {{ world.color_secondary }}; --w3: {{ world.color_accent }}">
+      <div class="world-band__inner"><h2 class="world-band__name">{% ui "home.hidden_world" %}</h2><p class="world-band__desc">{% ui "home.hidden_world.text" %}</p></div>
+      <div class="world-band__planet"><div class="planet" aria-hidden="true"></div></div>
+    </article>
+    {% else %}{% include "partials/world_band.html" %}{% endif %}
+  {% endfor %}
+</div>
+{% else %}<div class="wrap"><p class="empty-state">{% ui "empty.worlds" %}</p></div>{% endif %}
+{% endblock %}

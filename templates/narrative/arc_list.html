@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "story.title" %} — {% ui "site.name" %}{% endblock %}
+{% block description %}{% ui "story.lead" %}{% endblock %}
+{% block content %}
+<div class="wrap page-head"><h1>{% ui "story.title" %}</h1><p>{% ui "story.lead" %}</p></div>
+<div class="wrap">
+  {% if arcs %}
+  <ul class="rows">
+    {% for arc in arcs %}
+    <li class="row">
+      <span class="row__meta">{{ arc.get_arc_type_display }}{% if arc.world %}<br>{{ arc.world|loc:"name" }}{% endif %}</span>
+      <div>
+        <h2 class="row__title"><a href="{{ arc.get_absolute_url }}">{{ arc|loc:"title" }}</a></h2>
+        <p>{{ arc|loc:"summary" }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty-state">{% ui "empty.story" %}</p>{% endif %}
+</div>
+{% endblock %}

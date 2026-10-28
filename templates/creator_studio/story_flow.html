@@ -1,0 +1,31 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Flow — {{ chapter }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_list' 'chapters' %}">Story chapters</a> / <a href="{% url 'creator_studio:content_edit' 'chapters' chapter.pk %}">{{ chapter }}</a> /</p>
+<div class="studio-head"><div><h1>Story flow: {{ chapter.title_en }}</h1><p>Nodes are edited on the chapter page. Branches connect them here. Dashed violet lines are conditional; gold lines lead into another chapter.</p></div></div>
+<div class="flow-canvas" data-flow-canvas><p class="muted" style="padding:1rem">{% if graph.nodes %}The graph needs JavaScript to draw; the branch table below works without it.{% else %}This chapter has no nodes yet. Add nodes on the chapter page.{% endif %}</p></div>
+{{ graph|json_script:"flow-data" }}
+<section class="panel {% if report.errors %}panel--error{% elif report.warnings %}panel--warn{% else %}panel--ok{% endif %}">
+  <h2>Validation</h2>
+  {% if report.errors %}<ul class="report-list report-list--error">{% for e in report.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% if report.warnings %}<ul class="report-list report-list--warn">{% for w in report.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+  {% if not report.errors and not report.warnings %}<p class="muted">The graph is valid: one start node, every path ends, every node is reachable.</p>{% endif %}
+</section>
+<form method="post" novalidate class="inline-set" data-formset="branch">{% csrf_token %}
+  <h2>Branches</h2>
+  {{ formset.management_form }}
+  {% for e in formset.non_form_errors %}<p class="errorlist">{{ e }}</p>{% endfor %}
+  <div data-rows>
+  {% for sub in formset.forms %}
+  <div class="inline-row">
+    <div class="inline-row__head"><span>{% if sub.instance.pk %}{{ sub.instance }}{% else %}New branch{% endif %}</span><label>{{ sub.DELETE }} Remove</label></div>
+    {% for e in sub.non_field_errors %}<p class="errorlist">{{ e }}</p>{% endfor %}
+    {% for h in sub.hidden_fields %}{{ h }}{% endfor %}
+    <div class="form-grid">{% for field in sub.visible_fields %}{% if field.name != "DELETE" %}{% include "creator_studio/_field.html" %}{% endif %}{% endfor %}</div>
+  </div>
+  {% endfor %}
+  </div>
+  {% if can_edit %}<div class="form-actions"><button class="btn" type="submit">Save branches</button></div>
+  {% else %}<p class="panel panel--warn">You can view this flow but not change it{% if chapter.is_live %} (the chapter is live; publishing permission is required){% endif %}.</p>{% endif %}
+</form>
+{% endblock %}

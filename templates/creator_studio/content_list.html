@@ -1,0 +1,45 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}{{ section.label }} — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head">
+  <div><h1>{% if LANG == "ar" %}{{ section.label_ar }}{% else %}{{ section.label }}{% endif %}</h1><p>{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }}</p></div>
+  {% if can_add %}<a class="btn" href="{% url 'creator_studio:content_create' section.key %}">{% if section.key == "media" %}Upload media{% else %}{% ui "studio.new" %}{% endif %}</a>{% endif %}
+</div>
+<form class="toolbar" method="get" role="search">
+  <div class="field"><label for="q">{% ui "studio.search" %}</label><input id="q" type="search" name="q" value="{{ q }}"></div>
+  {% if section.publishable %}
+  <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="">Any</option>{% for v, l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  {% endif %}
+  {% for f in filter_options %}
+  <div class="field"><label for="f-{{ f.name }}">{{ f.label }}</label><select id="f-{{ f.name }}" name="{{ f.name }}"><option value="">Any</option>{% for v, l in f.choices %}<option value="{{ v }}" {% if f.value == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  {% endfor %}
+  <button class="btn btn--ghost btn--small" type="submit">Apply</button>
+</form>
+
+{% if section.key == "media" %}
+  <div class="media-grid">
+    {% for a in page_obj %}
+    <a class="media-card" href="{% url 'creator_studio:content_edit' 'media' a.pk %}">
+      <div class="media-card__thumb">{% if a.kind == "image" and a.url %}<img src="{{ a.url }}" alt="{{ a.alt_text_en }}" loading="lazy">{% else %}{{ a.get_kind_display }}{% endif %}</div>
+      <div class="media-card__body"><strong>{{ a.title }}</strong><br><span class="muted">{{ a.get_role_display }} · {{ a.size_bytes|filesizeformat }}{% if a.is_generated %} · generated{% endif %}{% if a.is_archived %} · archived{% endif %}</span></div>
+    </a>
+    {% empty %}<p class="empty-state">{% ui "studio.no_items" %}</p>{% endfor %}
+  </div>
+{% else %}
+  {% if page_obj.object_list %}
+  <div class="table-wrap"><table class="data">
+    <thead><tr>{% for col in section.list_display %}<th scope="col">{{ col|cut:"_en"|cut:"_ar"|capfirst|cut:"_" }}{% if "_ar" in col %} (AR){% endif %}</th>{% endfor %}{% if section.publishable %}<th scope="col">Status</th>{% endif %}<th scope="col">Updated</th></tr></thead>
+    <tbody>
+      {% for obj in page_obj %}
+      <tr>
+        {% for col in section.list_display %}<td {% if "_ar" in col %}dir="rtl" lang="ar"{% endif %}>{% if forloop.first %}<a href="{% url 'creator_studio:content_edit' section.key obj.pk %}">{{ obj|field_value:col }}</a>{% else %}{{ obj|field_value:col }}{% endif %}</td>{% endfor %}
+        {% if section.publishable %}<td>{% status_badge obj %}</td>{% endif %}
+        <td class="num">{{ obj.updated_at|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="empty-state">{% if q %}Nothing matches “{{ q }}”.{% else %}{% ui "studio.no_items" %}{% endif %}</p>{% endif %}
+{% endif %}
+{% include "partials/pagination.html" %}
+{% endblock %}

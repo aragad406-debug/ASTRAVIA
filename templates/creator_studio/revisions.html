@@ -1,0 +1,15 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Revisions — {{ obj }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_list' section.key %}">{{ section.label }}</a> / <a href="{% url 'creator_studio:content_edit' section.key obj.pk %}">{{ obj }}</a> /</p>
+<div class="studio-head"><div><h1>{% ui "studio.revisions" %}</h1><p>Every save creates a snapshot. Restoring copies its content into the current record; publication status is not changed.</p></div></div>
+{% if revisions %}
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Revision</th><th>Summary</th><th>Author</th><th>Saved</th><th></th></tr></thead>
+  <tbody>{% for r in revisions %}<tr>
+    <td class="num">{{ r.revision_number }}</td><td>{{ r.summary }}</td><td>{{ r.author.email|default:"system" }}</td><td class="num">{{ r.created_at|date:"Y-m-d H:i" }}</td>
+    <td><a href="{% url 'creator_studio:revision_detail' section.key obj.pk r.revision_number %}">Compare with current</a>{% if not forloop.last %} · <a href="{% url 'creator_studio:revision_detail' section.key obj.pk r.revision_number %}?compare={{ r.revision_number|add:'-1' }}">vs previous</a>{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="empty-state">No revisions yet. One is created the first time this record is saved in the studio.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}{% load static astravia %}
+{% block title %}{% ui "site.name" %} — {{ site_config|loc:"hero_title" }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"ASTRAVIA","alternateName":"أسترافيا","inLanguage":["en","ar"]}</script>
+{% endblock %}
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero__grid">
+    <div class="hero__text">
+      <p class="hero__wordmark reveal-on-load">{% if LANG == "ar" %}أسترافيا{% else %}ASTRAVIA{% endif %}</p>
+      <h1 class="hero__title reveal-on-load" id="hero-title">{{ site_config|loc:"hero_title" }}</h1>
+      {% if site_config.hero_intro_en or site_config.hero_intro_ar %}<p class="hero__intro reveal-on-load">{{ site_config|loc:"hero_intro" }}</p>{% endif %}
+      <div class="hero__actions reveal-on-load">
+        <a class="btn" href="{% url 'worlds:list' %}">{% ui "home.cta.explore" %}</a>
+        <a class="btn btn--ghost" href="{% if main_arc %}{{ main_arc.get_absolute_url }}{% else %}{% url 'narrative:arcs' %}{% endif %}">{% ui "home.cta.story" %}</a>
+        <a class="btn btn--ghost" href="#sovereigns">{% ui "home.cta.sovereigns" %}</a>
+        {% if site_config.trailer_media and site_config.trailer_media.url %}<a class="btn btn--gold" href="#trailer">{% ui "home.trailer" %}</a>
+        {% elif site_config.trailer_url %}<a class="btn btn--gold" href="{{ site_config.trailer_url }}" rel="noopener" target="_blank">{% ui "home.trailer" %}</a>{% endif %}
+      </div>
+    </div>
+    <div class="hero__visual">
+      <div class="orrery" data-orrery>
+        <div class="orrery__fallback" aria-hidden="true"></div>
+        <canvas aria-hidden="true"></canvas>
+        <ul class="orrery__labels" aria-label="{% ui 'nav.worlds' %}">
+          {% for w in worlds %}<li data-orrery-label style="--world-color: {{ w.color_primary }}"><a href="{{ w.get_absolute_url }}">{{ w|loc:"name" }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      {{ orrery|json_script:"orrery-data" }}
+    </div>
+  </div>
+</section>
+
+{% if site_config.trailer_media and site_config.trailer_media.url %}
+<section class="section" id="trailer" aria-label="{% ui 'home.trailer' %}">
+  <div class="wrap"><video class="media-frame" src="{{ site_config.trailer_media.url }}" controls preload="none" playsinline style="inline-size:100%"></video></div>
+</section>
+{% endif %}
+
+<section class="section" id="universe" aria-labelledby="universe-title">
+  <div class="wrap universe">
+    <h2 class="universe__title" id="universe-title">{% ui "home.universe.title" %}</h2>
+    <div class="universe__text prose">{{ site_config|loc:"universe_intro"|linebreaks }}</div>
+  </div>
+</section>
+
+<section class="section" id="worlds" aria-labelledby="worlds-title">
+  <div class="wrap section__head">
+    <h2 id="worlds-title">{% ui "home.worlds.title" %}</h2>
+    <p class="section__lead">{% ui "home.worlds.lead" %}</p>
+  </div>
+  {% if worlds %}
+  <div class="world-bands">
+    {% for world in worlds %}{% include "partials/world_band.html" %}{% endfor %}
+    {% for world in teaser_worlds %}
+    <article class="world-band theme-{{ world.theme }}" style="--w1: {{ world.color_primary }}; --w2: {{ world.color_secondary }}; --w3: {{ world.color_accent }}">
+      <div class="world-band__inner">
+        <h3 class="world-band__name">{% ui "home.hidden_world" %}</h3>
+        <p class="world-band__desc">{% ui "home.hidden_world.text" %}</p>
+      </div>
+      <div class="world-band__planet"><div class="planet" aria-hidden="true"></div></div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<div class="wrap"><p class="empty-state">{% ui "empty.worlds" %}</p></div>{% endif %}
+</section>
+
+<section class="section" id="sovereigns" aria-labelledby="sovereigns-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 id="sovereigns-title">{% ui "home.sovereigns.title" %}</h2>
+      <p class="section__lead">{% ui "home.sovereigns.lead" %}</p>
+    </div>
+    {% if sovereigns %}
+    <div class="sovereigns">
+      {% for c in sovereigns %}
+      <a class="sovereign" href="{{ c.get_absolute_url }}" style="--c: {{ c.signature_color }}">
+        <span class="sovereign__figure">{% include "partials/sigil.html" with person=c %}</span>
+        <h3 class="sovereign__name">{{ c|loc:"name" }}</h3>
+        <p class="sovereign__title">{{ c|loc:"title" }}{% if c.world %} · {{ c.world|loc:"name" }}{% endif %}</p>
+        <p class="sovereign__teaser">{{ c|loc:"teaser" }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}<p class="empty-state">{% ui "empty.characters" %}</p>{% endif %}
+  </div>
+</section>
+
+<section class="section" id="narrative" aria-labelledby="narrative-title">
+  <div class="wrap">
+    <h2 id="narrative-title" class="section__head">{% ui "home.narrative.title" %}</h2>
+    <div class="narrative">
+      <p class="narrative__quote">{{ site_config|loc:"narrative_intro" }}</p>
+      <ul class="themes">
+        <li>{% ui "theme.promises" %}</li><li>{% ui "theme.memories" %}</li><li>{% ui "theme.politics" %}</li><li>{% ui "theme.sacrifice" %}</li>
+        <li>{% ui "theme.histories" %}</li><li>{% ui "theme.choices" %}</li><li>{% ui "theme.endings" %}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="gameplay" aria-labelledby="gameplay-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 id="gameplay-title">{% ui "home.gameplay.title" %}</h2>
+      {% if site_config.gameplay_intro_en or site_config.gameplay_intro_ar %}<p class="section__lead">{{ site_config|loc:"gameplay_intro" }}</p>{% endif %}
+    </div>
+    <p class="notice" role="note">{% ui "home.gameplay.note" %}</p>
+    <dl class="gameplay">
+      <div class="gameplay__item"><dt>{% ui "gameplay.exploration" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.exploration.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.combat" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.combat.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.bosses" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.bosses.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.progression" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.progression.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.choices" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.choices.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.secrets" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.secrets.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.restoration" %} <span class="tag">{% ui "status.planned" %}</span></dt><dd>{% ui "gameplay.restoration.text" %}</dd></div>
+      <div class="gameplay__item"><dt>{% ui "gameplay.multiplayer" %} <span class="tag tag--future">{% ui "status.future" %}</span></dt><dd>{% ui "gameplay.multiplayer.text" %}</dd></div>
+    </dl>
+  </div>
+</section>
+
+{% if guide %}
+<section class="section" id="guide" aria-labelledby="guide-title">
+  <div class="wrap">
+    <div class="guide-feature">
+      {% include "partials/sigil.html" with person=guide.character size="large" %}
+      <div>
+        <h2 class="guide-feature__name" id="guide-title">{{ guide.character|loc:"name" }}</h2>
+        <p class="guide-feature__title">{{ guide.character|loc:"title" }}</p>
+        {% if guide.intro_narration_en or guide.intro_narration_ar %}<blockquote>{{ guide|loc:"intro_narration" }}</blockquote>{% endif %}
+        <p class="muted">{{ guide.character|loc:"biography"|truncatewords:60 }}</p>
+        <button class="btn" type="button" data-guide-trigger>{% ui "home.guide.talk" %}</button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" id="heart" aria-labelledby="heart-title">
+  <div class="wrap">
+    <div class="heart">
+      <h2 id="heart-title">{% if heart_lore %}{{ heart_lore|loc:"title" }}{% else %}{% ui "home.lore.title" %}{% endif %}</h2>
+      {% if heart_lore %}<p>{{ heart_lore|loc:"summary" }}</p>{% endif %}
+      <p><a class="btn btn--gold" href="{% if heart_lore %}{{ heart_lore.get_absolute_url }}{% else %}{% url 'narrative:lore' %}{% endif %}">{% ui "home.lore.more" %}</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="news" aria-labelledby="news-title">
+  <div class="wrap">
+    <div class="cluster" style="justify-content: space-between; margin-block-end: var(--space-5)">
+      <h2 id="news-title" style="margin:0">{% ui "home.news.title" %}</h2>
+      <a href="{% url 'announcements:list' %}">{% ui "home.news.all" %}</a>
+    </div>
+    {% if news %}
+    <ul class="rows">
+      {% for item in news %}
+      <li class="row">
+        <time class="row__meta" datetime="{{ item.display_date|date:'c' }}">{{ item.display_date|date:"j M Y" }}<br>{{ item.get_category_display }}</time>
+        <div><h3 class="row__title"><a href="{{ item.get_absolute_url }}">{{ item|loc:"title" }}</a></h3><p>{{ item|loc:"summary" }}</p></div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="empty-state">{% ui "news.empty" %}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/orrery.js' %}" defer></script>{% endblock %}

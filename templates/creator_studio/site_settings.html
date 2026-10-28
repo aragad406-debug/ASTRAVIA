@@ -1,0 +1,10 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Site settings — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Site settings</h1><p>Homepage copy, trailer, ambient audio, contact and social links. Changes are live immediately.</p></div></div>
+<form method="post" novalidate>{% csrf_token %}
+  {% if form.errors %}<div class="form-errors" role="alert"><p>Fix the highlighted fields and save again.</p></div>{% endif %}
+  <div class="panel"><div class="form-grid">{% for field in form.visible_fields %}{% include "creator_studio/_field.html" %}{% endfor %}</div></div>
+  <div class="form-actions"><button class="btn" type="submit">{% ui "studio.save" %}</button></div>
+</form>
+{% endblock %}

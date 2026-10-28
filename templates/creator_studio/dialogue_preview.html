@@ -1,0 +1,30 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Preview — {{ entry.key }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:content_list' 'dialogue' %}">Dialogue</a> / <a href="{% url 'creator_studio:content_edit' 'dialogue' entry.pk %}">{{ entry.key }}</a> /</p>
+<div class="studio-head"><div><h1>Dialogue preview</h1><p>Simulate a player's state and see which lines and choices the condition evaluator allows.</p></div></div>
+<div class="edit-layout">
+  <div>
+    {% if result %}
+    <section class="panel {% if result.entry_passes %}panel--ok{% else %}panel--error{% endif %}">
+      <h2>{{ entry.speaker|default:"Narrator" }} <span class="badge">{{ entry.get_emotion_display }}</span></h2>
+      <p style="font-size:1.2rem" lang="{{ result.lang }}" dir="{% if result.lang == 'ar' %}rtl{% else %}ltr{% endif %}">{{ result.text|default:"(no text in this language)" }}</p>
+      <p class="helptext-inline">{% if result.entry_passes %}Conditions met: this line would play.{% else %}Conditions not met: this line would not play.{% endif %} Duration {{ entry.display_duration_ms }} ms.</p>
+      {% if result.voice %}<audio controls src="{{ result.voice.url }}" style="inline-size:100%"></audio>{% endif %}
+      {% if result.choices %}<h3>Choices</h3><ul class="compact-list">{% for c in result.choices %}<li><span lang="{{ result.lang }}">{{ c.text }}</span><small>{% if c.passes %}available{% else %}hidden by condition{% endif %} → {{ c.choice.next_entry.key|default:"end" }}</small></li>{% endfor %}</ul>{% endif %}
+    </section>
+    {% endif %}
+    <section class="panel">
+      <h2>Line conditions</h2>
+      <pre class="json" style="white-space:pre-wrap">{{ entry.conditions|default:"{}" }}</pre>
+    </section>
+  </div>
+  <aside>
+    <form method="get" class="panel">
+      <h2>Player state</h2>
+      {% for field in form.visible_fields %}{% include "creator_studio/_field.html" %}{% endfor %}
+      <button class="btn" type="submit">Run preview</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

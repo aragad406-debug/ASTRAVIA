@@ -1,0 +1,16 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Import translations — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{% url 'creator_studio:localization' %}">Localization</a> /</p>
+<div class="studio-head"><div><h1>Import translations</h1><p>Upload a file produced by Export. Only localized text fields are updated; every changed record gets a revision. Published records need publishing permission.</p></div></div>
+<form method="post" enctype="multipart/form-data" class="panel" novalidate>{% csrf_token %}
+  {% for field in form.visible_fields %}{% include "creator_studio/_field.html" %}{% endfor %}
+  <button class="btn" type="submit">Import</button>
+</form>
+{% if report %}
+<section class="panel {% if report.errors %}panel--warn{% else %}panel--ok{% endif %}">
+  <h2>Result</h2><p>{{ report.updated }} updated · {{ report.skipped }} skipped</p>
+  {% if report.errors %}<ul class="report-list report-list--warn">{% for e in report.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

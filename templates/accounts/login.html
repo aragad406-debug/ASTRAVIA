@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "account.sign_in.title" %} — {% ui "site.name" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block guide %}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="auth-card">
+  <h1>{% ui "account.sign_in.title" %}</h1>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn" type="submit">{% ui "account.sign_in.button" %}</button>
+  </form>
+  <div class="auth-links">
+    <a href="{% url 'accounts:password_reset' %}">{% ui "account.forgot" %}</a>
+    <a href="{% url 'accounts:register' %}">{% ui "account.no_account" %}</a>
+  </div>
+</div></div>
+{% endblock %}

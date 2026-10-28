@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% ui "characters.title" %} — {% ui "site.name" %}{% endblock %}
+{% block description %}{% ui "characters.lead" %}{% endblock %}
+{% block content %}
+<div class="wrap page-head">
+  <h1>{% ui "characters.title" %}</h1>
+  <p>{% ui "characters.lead" %}</p>
+</div>
+<div class="wrap">
+  <nav class="chip-nav" aria-label="Filter by category">
+    <a class="chip" href="?{% query_transform category='' %}" {% if not category %}aria-current="true"{% endif %}>{% ui "characters.filter.all" %}</a>
+    {% for value, label in categories %}<a class="chip" href="?{% query_transform category=value %}" {% if category == value %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+  {% if characters %}
+  <div class="character-grid">
+    {% for c in characters %}
+      {% if c.visibility == "teaser" %}
+      <div class="character-tile" style="--c: {{ c.signature_color }}">
+        <span class="sigil sigil--small" style="--c: {{ c.signature_color }}; filter: grayscale(.6) brightness(.7)" aria-hidden="true"></span>
+        <h2 class="character-tile__name">{{ c|loc:"name" }}</h2>
+        <p class="character-tile__title">{{ c|loc:"title" }}</p>
+        <p>{{ c|loc:"teaser" }}</p>
+      </div>
+      {% else %}
+      <a class="character-tile" href="{{ c.get_absolute_url }}" style="--c: {{ c.signature_color }}">
+        {% include "partials/sigil.html" with person=c size="small" %}
+        <h2 class="character-tile__name">{{ c|loc:"name" }}</h2>
+        <p class="character-tile__title">{{ c|loc:"title" }}{% if c.world %} · {{ c.world|loc:"name" }}{% endif %}</p>
+        <p>{{ c|loc:"teaser" }}</p>
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}<p class="empty-state">{% ui "empty.characters" %}</p>{% endif %}
+</div>
+{% endblock %}

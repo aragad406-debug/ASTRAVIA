@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ arc|loc:"title" }} — {% ui "site.name" %}{% endblock %}
+{% block description %}{{ arc|loc:"summary"|truncatechars:160 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ arc|loc:"title" }}{% endblock %}
+{% block content %}
+<div class="wrap wrap--narrow page-head">
+  <p class="muted">{{ arc.get_arc_type_display }}{% if arc.world %} · <a href="{{ arc.world.get_absolute_url }}">{{ arc.world|loc:"name" }}</a>{% endif %}</p>
+  <h1>{{ arc|loc:"title" }}</h1>
+  <p>{{ arc|loc:"summary" }}</p>
+</div>
+<div class="wrap wrap--narrow">
+  <h2>{% ui "story.chapters" %}</h2>
+  {% if chapters %}
+  <ol class="chapter-list">
+    {% for ch in chapters %}<li><div><a href="{{ ch.get_absolute_url }}{% if request.is_preview %}?preview=1{% endif %}">{{ ch|loc:"title" }}</a><p>{{ ch.get_chapter_type_display }} — {{ ch|loc:"summary" }}</p></div></li>{% endfor %}
+  </ol>
+  {% else %}<p class="empty-state">{% ui "empty.story" %}</p>{% endif %}
+</div>
+{% endblock %}

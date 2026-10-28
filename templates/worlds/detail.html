@@ -1,0 +1,72 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{% if teaser %}{% ui "home.hidden_world" %}{% else %}{{ world|loc:"name" }}{% endif %} — {% ui "site.name" %}{% endblock %}
+{% block description %}{% if teaser %}{% ui "home.hidden_world.text" %}{% else %}{{ world|loc:"short_description"|truncatechars:160 }}{% endif %}{% endblock %}
+{% block og_title %}{% if teaser %}{% ui "home.hidden_world" %}{% else %}{{ world|loc:"name" }}{% endif %}{% endblock %}
+{% block og_image %}{% if world.hero_image and world.hero_image.url and not teaser %}<meta property="og:image" content="{% absolute_url world.hero_image.url %}">{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block content %}
+<section class="world-hero theme-{{ world.theme }}" style="--w1: {{ world.color_primary }}; --w2: {{ world.color_secondary }}; --w3: {{ world.color_accent }}">
+  {% if world.hero_image and world.hero_image.url and not teaser %}<div class="world-hero__img"><img src="{{ world.hero_image.url }}" alt="{{ world.hero_image|loc:'alt_text' }}"></div>{% endif %}
+  <div class="wrap world-hero__grid">
+    <div>
+      {% if teaser %}
+        <h1>{% ui "home.hidden_world" %}</h1>
+        <p class="section__lead">{% ui "home.hidden_world.text" %}</p>
+      {% else %}
+        <h1>{{ world|loc:"name" }}</h1>
+        <p class="world-band__tagline">{{ world|loc:"tagline" }}</p>
+        <div class="prose muted">{{ world|loc:"description"|linebreaks }}</div>
+      {% endif %}
+    </div>
+    <div class="planet" aria-hidden="true"></div>
+  </div>
+</section>
+{% if not teaser %}
+<div class="wrap section">
+  <div class="split">
+    <div>
+      {% if world.environment_en or world.environment_ar %}
+      <section aria-labelledby="env-title"><h2 id="env-title">{% ui "world.environment" %}</h2><div class="prose">{{ world|loc:"environment"|linebreaks }}</div></section>
+      {% endif %}
+      {% if world.lore_teaser_en or world.lore_teaser_ar %}<p class="world-band__teaser" style="--w1: {{ world.color_primary }}">{{ world|loc:"lore_teaser" }}</p>{% endif %}
+
+      {% if regions %}
+      <section class="section" aria-labelledby="regions-title" style="padding-block-start: var(--space-7)">
+        <h2 id="regions-title">{% ui "world.regions" %}</h2>
+        <ul class="rows">
+          {% for r in regions %}<li class="row"><span class="row__meta">{{ r.get_kind_display }}</span><div><h3 class="row__title">{{ r|loc:"name" }}</h3><p>{{ r|loc:"description" }}</p></div></li>{% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      {% if characters %}
+      <section class="section" aria-labelledby="chars-title" style="padding-block-start: var(--space-7)">
+        <h2 id="chars-title">{% ui "world.characters" %}</h2>
+        <div class="character-grid">
+          {% for c in characters %}
+          <a class="character-tile" href="{{ c.get_absolute_url }}" style="--c: {{ c.signature_color }}">
+            {% include "partials/sigil.html" with person=c size="small" %}
+            <h3 class="character-tile__name">{{ c|loc:"name" }}</h3>
+            <p class="character-tile__title">{{ c|loc:"title" }}</p>
+            <p>{{ c|loc:"teaser" }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+    <aside>
+      <dl class="facts">
+        {% if ruler %}<div><dt>{% ui "home.world.ruler" %}</dt><dd><a href="{{ ruler.get_absolute_url }}">{{ ruler|loc:"name" }}</a> — {{ ruler|loc:"title" }}</dd></div>{% endif %}
+        {% if world.capital_en or world.capital_ar %}<div><dt>{% ui "home.world.capital" %}</dt><dd>{{ world|loc:"capital" }}</dd></div>{% endif %}
+      </dl>
+      {% if arcs %}<section><h2 class="h4" style="font-size: var(--step-1)">{% ui "world.story" %}</h2><ul class="link-list">{% for a in arcs %}<li><a href="{{ a.get_absolute_url }}">{{ a|loc:"title" }}</a><small>{{ a|loc:"summary"|truncatewords:18 }}</small></li>{% endfor %}</ul></section>{% endif %}
+      {% if quests %}<section><h2 style="font-size: var(--step-1)">{% ui "world.quests" %}</h2><ul class="link-list">{% for q in quests %}<li><a href="{{ q.get_absolute_url }}">{{ q|loc:"title" }}</a><small>{{ q.get_quest_type_display }}</small></li>{% endfor %}</ul></section>{% endif %}
+      {% if lore %}<section><h2 style="font-size: var(--step-1)">{% ui "world.lore" %}</h2><ul class="link-list">{% for l in lore %}<li><a href="{{ l.get_absolute_url }}">{{ l|loc:"title" }}</a><small>{{ l.get_entry_type_display }}</small></li>{% endfor %}</ul></section>{% endif %}
+      {% if other_worlds %}<section><h2 style="font-size: var(--step-1)">{% ui "world.other" %}</h2><ul class="link-list">{% for w in other_worlds %}<li><a href="{{ w.get_absolute_url }}">{{ w|loc:"name" }}</a></li>{% endfor %}</ul></section>{% endif %}
+    </aside>
+  </div>
+</div>
+{% else %}
+<div class="wrap section"><div class="sealed"><h2>{% ui "error.403.title" %}</h2><p>{% ui "home.hidden_world.text" %}</p></div></div>
+{% endif %}
+{% endblock %}

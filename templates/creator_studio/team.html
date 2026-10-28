@@ -1,0 +1,20 @@
+{% extends "creator_studio/base.html" %}{% load astravia %}
+{% block title %}Team & roles — {% ui "studio.name" %}{% endblock %}
+{% block content %}
+<div class="studio-head"><div><h1>Team &amp; roles</h1><p>Roles grant permissions; every studio action is re-checked on the server.</p></div></div>
+<div class="edit-layout">
+  <div class="table-wrap"><table class="data">
+    <thead><tr><th>Member</th><th>Roles</th><th>Last sign-in</th></tr></thead>
+    <tbody>{% for m in members %}<tr><td>{{ m.email }}{% if m.is_superuser %} <span class="badge badge--scheduled">owner (superuser)</span>{% endif %}{% if not m.has_usable_password %} <span class="badge">password not set</span>{% endif %}</td>
+      <td>{% for g in m.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="muted">none</span>{% endfor %}</td><td class="num">{{ m.last_login|date:"Y-m-d H:i"|default:"never" }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <aside>
+    <form method="post" class="panel" novalidate>{% csrf_token %}
+      <h2>Add or update a member</h2>
+      <p class="helptext-inline">Selected roles replace the member's current roles. New members set their password with “Forgot your password?”.</p>
+      {% for field in form.visible_fields %}{% include "creator_studio/_field.html" %}{% endfor %}
+      <button class="btn" type="submit">Save roles</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load astravia %}
+{% block title %}{{ entry|loc:"title" }} — {% ui "lore.title" %}{% endblock %}
+{% block description %}{{ entry|loc:"summary"|truncatechars:160 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ entry|loc:"title" }}{% endblock %}
+{% block content %}
+<article class="wrap">
+  <header class="page-head">
+    <p class="muted"><a href="{% url 'narrative:lore' %}">{% ui "lore.title" %}</a> · {{ entry.get_entry_type_display }}</p>
+    <h1>{{ entry|loc:"title" }}</h1>
+    <p>{{ entry|loc:"summary" }}</p>
+  </header>
+  <div class="split">
+    <div>
+      {% if teaser %}<div class="sealed"><p>{% ui "error.403.text" %}</p></div>
+      {% else %}<div class="story-text" lang="{{ entry|loc_lang:'content' }}">{{ entry|loc:"content"|linebreaks }}</div>{% endif %}
+    </div>
+    {% if not teaser %}
+    <aside>
+      <dl class="facts">
+        {% if entry.timeline_label_en or entry.timeline_label_ar %}<div><dt>{% ui "lore.timeline" %}</dt><dd>{{ entry|loc:"timeline_label" }}</dd></div>{% endif %}
+        {% if worlds %}<div><dt>{% ui "nav.worlds" %}</dt><dd>{% for w in worlds %}<a href="{{ w.get_absolute_url }}">{{ w|loc:"name" }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}
+      </dl>
+      {% if related %}<section><h2 style="font-size: var(--step-1)">{% ui "lore.related" %}</h2><ul class="link-list">{% for r in related %}<li><a href="{{ r.get_absolute_url }}">{{ r|loc:"title" }}</a><small>{{ r.get_entry_type_display }}</small></li>{% endfor %}</ul></section>{% endif %}
+    </aside>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}
